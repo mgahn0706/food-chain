@@ -8,12 +8,38 @@ export default function App() {
   useEffect(() => {
     insertCoin({
       gameId: import.meta.env.VITE_PLAYROOM_GAME_ID,
-      // you can customize lobby options here
     }).then(() => setConnected(true));
   }, []);
 
   if (!connected) {
-    return <div className="loading">Connecting to Playroom lobby...</div>;
+    return (
+      <div className="h-screen w-screen bg-[#0b0b0f] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6 text-center">
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
+            THE FOOD CHAIN
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-sm md:text-base text-gray-400 tracking-wide">
+            Trust no one. Predict everything.
+          </p>
+
+          {/* Divider */}
+          <div className="w-32 h-px bg-gradient-to-r from-transparent via-gray-500 to-transparent" />
+
+          {/* Spinner */}
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full border-2 border-gray-600 border-t-white animate-spin" />
+          </div>
+
+          {/* Loading Text */}
+          <p className="text-xs text-gray-500 tracking-widest animate-pulse">
+            CONNECTING TO LOBBY
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <GameRouter />;
