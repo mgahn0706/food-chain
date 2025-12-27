@@ -17,7 +17,7 @@ export default function App() {
         <div className="flex flex-col items-center gap-6 text-center">
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-            THE FOOD CHAIN
+            먹이사슬
           </h1>
 
           {/* Subtitle */}

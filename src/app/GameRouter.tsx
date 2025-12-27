@@ -1,10 +1,11 @@
-import GameScreen from "../assets/ui/lobby/GameScreen";
+import useGamePhase from "@/game/state/useGamePhase";
 import LobbyScreen from "../assets/ui/lobby/LobbyScreen";
-import { useLobbyState } from "../game/state/useLobbyState";
 
 export default function GameRouter() {
-  const { lobby } = useLobbyState();
+  const { phase, round, moveToNextPhase } = useGamePhase();
 
-  if (lobby.phase === "LOBBY") return <LobbyScreen />;
-  return <GameScreen />;
+  if (phase === "SETTING") {
+    return <LobbyScreen />;
+  }
+  return null;
 }

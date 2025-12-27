@@ -14,16 +14,17 @@ export default function LobbyScreen() {
       <div>
         <PlayerList />
       </div>
-
-      <div>
-        <ReadyPanel />
-      </div>
+      {!isHost && (
+        <div>
+          <ReadyPanel />
+        </div>
+      )}
 
       {/* ================= Host 전용 영역 ================= */}
       {/* Host만 SettingPhase를 볼 수 있음 */}
       {isHost && (
         <div className="mt-4">
-          <SettingPhase onNextPhase={() => {}} />
+          <SettingPhase />
         </div>
       )}
     </div>
