@@ -22,7 +22,8 @@ export default function App() {
 
           {/* Subtitle */}
           <p className="text-sm md:text-base text-gray-400 tracking-wide">
-            Trust no one. Predict everything.
+            포식자와 피식자들은 지역을 이동하며 생존하고
+            <br /> 게임 종료 전까지 각자의 승리조건을 충족하라
           </p>
 
           {/* Divider */}

@@ -4,18 +4,14 @@ import { Badge } from "@/components/ui/badge";
 export default function PlayerRow({
   player,
   isHost,
-  isSelf,
 }: {
   player: PlayerState;
   isHost: boolean;
-  isSelf: boolean;
 }) {
   const [name] = usePlayerState<string>(player, "name", "");
   const [ready] = usePlayerState<boolean>(player, "ready", false);
 
   const displayName = name?.trim() ? name.trim() : player.getProfile().name;
-
-  const isSelfHost = isHost && isSelf;
 
   // deterministic user icon (1~7)
   const userIconIndex =
@@ -25,7 +21,7 @@ export default function PlayerRow({
       7) +
     1;
 
-  const iconSrc = isSelfHost
+  const iconSrc = isHost
     ? "src/assets/user/host-icon.png"
     : `src/assets/user/user-icon-${userIconIndex}.png`;
 
@@ -50,19 +46,20 @@ export default function PlayerRow({
 
       {/* 우측: 역할 + 상태 */}
       <div className="flex items-center gap-2 justify-end sm:justify-start">
-        {isSelfHost && (
+        {isHost && (
           <span className="text-xs font-medium text-yellow-600">붕대맨</span>
         )}
-
-        <Badge
-          variant={ready ? "default" : "secondary"}
-          className={`
+        {!isHost && (
+          <Badge
+            variant={ready ? "default" : "secondary"}
+            className={`
             text-xs
             ${ready ? "bg-blue-600 text-white" : "text-gray-500"}
           `}
-        >
-          {ready ? "준비" : "준비 안 함"}
-        </Badge>
+          >
+            {ready ? "준비" : "준비 안 함"}
+          </Badge>
+        )}
       </div>
     </div>
   );

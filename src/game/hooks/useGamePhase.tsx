@@ -9,7 +9,7 @@ type GamePhase =
   | "RESULT";
 
 export default function useGamePhase() {
-  const [round, setRound] = useMultiplayerState("round", 0);
+  const [round, setRound] = useMultiplayerState<number>("round", 0);
   const [phase, setPhase] = useMultiplayerState<GamePhase>("phase", "SETTING");
 
   const moveToNextPhase = () => {

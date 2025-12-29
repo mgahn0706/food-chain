@@ -1,30 +1,28 @@
-import { useIsHost } from "playroomkit";
-
+import { myPlayer } from "playroomkit";
 import PlayerList from "./PlayerList";
 import ReadyPanel from "./ReadyPanel";
 import SettingPhase from "./SettingPhase";
+import { useSyncHostId } from "@/game/hooks/useSyncHost";
 
-export default function LobbyScreen() {
-  const isHost = useIsHost();
+export default function LobbyScreen({
+  onNextPhase,
+}: {
+  onNextPhase: () => void;
+}) {
+  const my = myPlayer();
+  const hostId = useSyncHostId();
+
+  const isHost = my.id === hostId;
 
   return (
     <div className="flex h-full w-full flex-col gap-6 px-6 py-4">
-      {/* ================= 공통 영역 ================= */}
-      {/* 모든 플레이어가 보는 영역 */}
-      <div>
-        <PlayerList />
-      </div>
-      {!isHost && (
-        <div>
-          <ReadyPanel />
-        </div>
-      )}
+      <PlayerList />
 
-      {/* ================= Host 전용 영역 ================= */}
-      {/* Host만 SettingPhase를 볼 수 있음 */}
+      {!isHost && <ReadyPanel />}
+
       {isHost && (
         <div className="mt-4">
-          <SettingPhase />
+          <SettingPhase onNextPhase={onNextPhase} />
         </div>
       )}
     </div>
