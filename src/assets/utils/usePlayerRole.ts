@@ -32,6 +32,9 @@ const usePlayerRole = () => {
     nonHostPlayers.forEach((player, index) => {
       player.setState("role", shuffledRoles[index]);
       player.setState("status", "ALIVE");
+      player.setState("hasEaten", [false, false, false, false]);
+      player.setState("biomeHistory", []);
+      player.setState("result", null);
     });
 
     // (선택) Host role 명시적으로 null 처리

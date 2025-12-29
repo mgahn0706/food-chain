@@ -23,20 +23,6 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
 
   const myStatus = me.getState("status");
 
-  /* ===================== DEAD VIEW ===================== */
-  if (myStatus === "DEAD") {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
-        <PlayerHeader />
-        <Skull className="mb-6 h-20 w-20 text-gray-400" />
-        <h1 className="mb-2 text-2xl font-bold text-gray-700">
-          당신은 사망하셨습니다
-        </h1>
-        <p className="text-gray-500">저승으로 이동하세요</p>
-      </div>
-    );
-  }
-
   /* ===================== ALIVE VIEW ===================== */
 
   const [targetId, setTargetId] = useState<string | null>(null);
@@ -76,6 +62,20 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
     defenderId: targetId,
     round,
   });
+
+  /* ===================== DEAD VIEW ===================== */
+  if (myStatus === "DEAD") {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
+        <PlayerHeader />
+        <Skull className="mb-6 h-20 w-20 text-gray-400" />
+        <h1 className="mb-2 text-2xl font-bold text-gray-700">
+          당신은 사망하셨습니다
+        </h1>
+        <p className="text-gray-500">저승으로 이동하세요</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full flex-col px-6 py-10">

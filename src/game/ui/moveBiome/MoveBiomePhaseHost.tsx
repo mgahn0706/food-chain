@@ -4,9 +4,11 @@ import { BIOMES } from "@/game/config/biome";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Skull } from "lucide-react";
 import { usePlayersList } from "playroomkit";
 import { useEffect, useMemo, useState } from "react";
+
+type PlayerStatus = "ALIVE" | "DEAD";
 
 export default function MoveBiomePhaseHost({
   round,
@@ -16,7 +18,7 @@ export default function MoveBiomePhaseHost({
   onNextPhase: () => void;
 }) {
   const [seconds, setSeconds] = useState(0);
-  const [isAnimalRevealed, setIsAnimalRevealed] = useState(false);
+  const [isAnimalRevealed, setIsAnimalRevealed] = useState(round !== 1);
 
   useEffect(() => {
     setSeconds(0);
@@ -37,21 +39,39 @@ export default function MoveBiomePhaseHost({
 
   const roundIndex = round - 1;
 
-  const grouped: Record<BiomeId | "NONE", typeof players> = {
-    SKY: [],
-    FIELD: [],
-    FOREST: [],
-    RIVER: [],
-    NONE: [],
-  };
+  /* ===================== IMMUTABLE GROUPING ===================== */
 
-  players.forEach((p) => {
-    const history = (p.getState("biomeHistory") as (BiomeId | null)[]) ?? [];
-    const biome = history[roundIndex];
+  const grouped = useMemo(() => {
+    const initial: Record<BiomeId | "NONE" | "DEAD", typeof players> = {
+      SKY: [],
+      FIELD: [],
+      FOREST: [],
+      RIVER: [],
+      NONE: [],
+      DEAD: [],
+    };
 
-    if (!biome) grouped.NONE.push(p);
-    else grouped[biome].push(p);
-  });
+    return players.reduce((acc, p) => {
+      const status = p.getState("status") as PlayerStatus | null;
+
+      // ☠️ 사망자는 무조건 저승
+      if (status === "DEAD") {
+        return { ...acc, DEAD: [...acc.DEAD, p] };
+      }
+
+      const history = (p.getState("biomeHistory") as (BiomeId | null)[]) ?? [];
+      const biome = history[roundIndex];
+
+      if (!biome) {
+        return { ...acc, NONE: [...acc.NONE, p] };
+      }
+
+      return {
+        ...acc,
+        [biome]: [...acc[biome], p],
+      };
+    }, initial);
+  }, [players, roundIndex]);
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -63,8 +83,7 @@ export default function MoveBiomePhaseHost({
             <h1 className="text-2xl font-bold">장소 이동</h1>
             <button
               onClick={() => setIsAnimalRevealed((v) => !v)}
-              className="text-gray-400 hover:text-gray-700 transition-colors"
-              title={isAnimalRevealed ? "동물 비공개" : "동물 공개"}
+              className="text-gray-400 transition-colors hover:text-gray-700"
             >
               {isAnimalRevealed ? (
                 <Eye className="h-5 w-5" />
@@ -75,12 +94,12 @@ export default function MoveBiomePhaseHost({
           </div>
         </div>
 
-        <div className="text-sm font-medium text-gray-500 tabular-nums">
+        <div className="tabular-nums text-sm font-medium text-gray-500">
           {mm}:{ss}
         </div>
       </div>
 
-      {/* ================= Biome Cards ================= */}
+      {/* ================= Biomes ================= */}
       <div className="space-y-4">
         {Object.values(BIOMES).map((biome) => (
           <div
@@ -88,7 +107,6 @@ export default function MoveBiomePhaseHost({
             className="rounded-xl px-6 py-5 text-white"
             style={biomeGradient(biome.color)}
           >
-            {/* Header row */}
             <div className="flex items-center gap-3">
               <span className="text-lg font-medium">{biome.name}</span>
               <span className="text-lg font-semibold opacity-90">
@@ -96,16 +114,14 @@ export default function MoveBiomePhaseHost({
               </span>
             </div>
 
-            {/* Player list INSIDE card */}
             {grouped[biome.id].length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {grouped[biome.id].map((p) => {
                   const role = p.getState("role") as AnimalId | null;
-
                   return (
                     <div
                       key={p.id}
-                      className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-sm text-gray-900 shadow-sm"
+                      className="flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-sm text-gray-900"
                     >
                       {isAnimalRevealed && role && (
                         <img
@@ -113,9 +129,7 @@ export default function MoveBiomePhaseHost({
                           className="h-5 w-5 rounded-full"
                         />
                       )}
-
                       {p.getState("name") || p.getProfile().name}
-
                       {isAnimalRevealed && role && (
                         <span className="text-xs text-gray-500">
                           {animalNameMap[role]}
@@ -141,7 +155,6 @@ export default function MoveBiomePhaseHost({
           <div className="flex flex-wrap gap-2">
             {grouped.NONE.map((p) => {
               const role = p.getState("role") as AnimalId | null;
-
               return (
                 <div
                   key={p.id}
@@ -153,11 +166,46 @@ export default function MoveBiomePhaseHost({
                       className="h-5 w-5 rounded-full"
                     />
                   )}
-
                   {p.getState("name") || p.getProfile().name}
-
                   {isAnimalRevealed && role && (
                     <span className="text-xs text-gray-400">
+                      {animalNameMap[role]}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ================= DEAD / HELL ================= */}
+        <div className="rounded-xl bg-gray-200 px-6 py-5">
+          <div className="mb-3 flex items-center gap-2 text-gray-700">
+            <Skull className="h-5 w-5" />
+            저승 {grouped.DEAD.length}
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {grouped.DEAD.map((p) => {
+              const role = p.getState("role") as AnimalId | null;
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm"
+                >
+                  {isAnimalRevealed && role && (
+                    <img
+                      src={`/animal/${role}.svg`}
+                      className="h-5 w-5 rounded-full"
+                    />
+                  )}
+
+                  <span className="whitespace-nowrap">
+                    {p.getState("name") || p.getProfile().name}
+                  </span>
+
+                  {isAnimalRevealed && role && (
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
                       {animalNameMap[role]}
                     </span>
                   )}

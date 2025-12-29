@@ -1,6 +1,7 @@
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { Button } from "@/components/ui/button";
 import { BIOMES } from "@/game/config/biome";
+import useCheckHasEaten from "@/game/hooks/useCheckHasEaten";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
@@ -18,7 +19,7 @@ export default function AttackPhaseHost({
   onNextPhase: () => void;
 }) {
   const [seconds, setSeconds] = useState(0);
-  const [isAnimalRevealed, setIsAnimalRevealed] = useState(false);
+  const [isAnimalRevealed, setIsAnimalRevealed] = useState(true);
 
   useEffect(() => {
     setSeconds(0);
@@ -31,6 +32,8 @@ export default function AttackPhaseHost({
 
   const hostId = useSyncHostId();
   const playersAll = usePlayersList(true);
+
+  const { checkHasEaten } = useCheckHasEaten({ round });
 
   const players = useMemo(
     () => playersAll.filter((p) => p.id !== hostId),
@@ -124,7 +127,7 @@ export default function AttackPhaseHost({
                     >
                       {isAnimalRevealed && role && (
                         <img
-                          src={`s/animal/${role}.svg`}
+                          src={`/animal/${role}.svg`}
                           className="h-5 w-5 rounded-full"
                         />
                       )}
@@ -150,14 +153,32 @@ export default function AttackPhaseHost({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {grouped.DEAD.map((p) => (
-              <div
-                key={p.id}
-                className="rounded-full bg-white px-3 py-1 text-sm"
-              >
-                {p.getState("name") || p.getProfile().name}
-              </div>
-            ))}
+            {grouped.DEAD.map((p) => {
+              const role = p.getState("role") as AnimalId | null;
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm"
+                >
+                  {isAnimalRevealed && role && (
+                    <img
+                      src={`/animal/${role}.svg`}
+                      className="h-5 w-5 rounded-full"
+                    />
+                  )}
+
+                  <span className="whitespace-nowrap">
+                    {p.getState("name") || p.getProfile().name}
+                  </span>
+
+                  {isAnimalRevealed && role && (
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                      {animalNameMap[role]}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -165,7 +186,10 @@ export default function AttackPhaseHost({
       <div className="mt-10 flex justify-center">
         <Button
           className="bg-blue-500 text-white hover:bg-blue-600"
-          onClick={onNextPhase}
+          onClick={() => {
+            checkHasEaten();
+            onNextPhase();
+          }}
         >
           {round} 라운드 종료
         </Button>

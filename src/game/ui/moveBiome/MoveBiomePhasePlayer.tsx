@@ -6,6 +6,7 @@ import type { BiomeId } from "@/game/types/biome";
 import { BIOMES } from "@/game/config/biome";
 import type { AnimalId } from "@/game/types/animal";
 import { ANIMALS } from "@/game/config/animals";
+import PlayerHeader from "@/game/components/PlayerHeader";
 
 /* ===================== utils ===================== */
 
@@ -43,6 +44,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
   if (myStatus === "DEAD") {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
+        <PlayerHeader />
         <Skull className="mb-6 h-20 w-20 text-gray-400" />
         <h1 className="mb-2 text-2xl font-bold text-gray-700">
           당신은 사망하셨습니다
@@ -84,6 +86,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
 
   return (
     <div className="flex h-full w-full flex-col px-6 py-6">
+      <PlayerHeader />
       <style>{`
         @keyframes gradientWave {
           0%   { background-position: 0% 50%; }
@@ -96,9 +99,23 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
         {/* ================= Header ================= */}
         <div className="mb-4 text-center">
           <p className="text-sm text-gray-400">{round} 라운드</p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight">
-            이동할 서식지를 선택하십시오.
-          </h1>
+          {selectedBiome ? (
+            <div className="flex justify-center">
+              <h1 className={`mt-1 text-2xl font-bold tracking-tight`}>
+                {BIOMES[selectedBiome].name}
+              </h1>
+              <h1 className="mt-1 text-2xl font-medium tracking-tight">
+                {selectedBiome === "FIELD" || selectedBiome === "SKY"
+                  ? "로 "
+                  : "으로 "}
+                이동해 주십시오.
+              </h1>
+            </div>
+          ) : (
+            <h1 className="mt-1 text-2xl font-bold tracking-tight">
+              이동할 서식지를 선택하십시오.
+            </h1>
+          )}
         </div>
 
         {/* ================= Grid ================= */}
