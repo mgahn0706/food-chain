@@ -31,6 +31,7 @@ const usePlayerRole = () => {
     // ✅ non-host 플레이어에게만 배정
     nonHostPlayers.forEach((player, index) => {
       player.setState("role", shuffledRoles[index]);
+      player.setState("status", "ALIVE");
     });
 
     // (선택) Host role 명시적으로 null 처리

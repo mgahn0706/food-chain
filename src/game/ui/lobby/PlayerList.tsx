@@ -1,4 +1,4 @@
-import { myPlayer, usePlayersList } from "playroomkit";
+import { usePlayersList } from "playroomkit";
 import PlayerRow from "./PlayerRow";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 

@@ -1,7 +1,7 @@
 import { useIsHost, usePlayersList, useMultiplayerState } from "playroomkit";
 
-import type { AnimalId } from "../../../game/types/animal";
-import { ALL_ANIMALS } from "../../../game/config/animals";
+import type { AnimalId } from "../../types/animal";
+import { ALL_ANIMALS } from "../../config/animals";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import usePlayerRole from "@/assets/utils/usePlayerRole";

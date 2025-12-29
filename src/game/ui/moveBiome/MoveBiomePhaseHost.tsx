@@ -171,6 +171,7 @@ export default function MoveBiomePhaseHost({
       {/* ================= Footer ================= */}
       <div className="mt-10 flex justify-center">
         <Button
+          disabled={grouped.NONE.length > 0}
           className="bg-blue-500 text-white hover:bg-blue-600"
           onClick={onNextPhase}
         >
