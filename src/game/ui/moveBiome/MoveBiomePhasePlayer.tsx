@@ -1,6 +1,6 @@
 import React from "react";
 import { myPlayer, usePlayerState } from "playroomkit";
-import { Cloud, Wheat, Trees, Waves } from "lucide-react";
+import { Cloud, Wheat, Trees, Waves, Skull } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
 import { BIOMES } from "@/game/config/biome";
@@ -36,6 +36,23 @@ const BIOME_UI: Record<BiomeId, { icon: React.ElementType }> = {
 
 export default function MoveBiomePhasePlayer({ round }: { round: number }) {
   const me = myPlayer();
+
+  const myStatus = me.getState("status");
+
+  /* ===================== DEAD VIEW ===================== */
+  if (myStatus === "DEAD") {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
+        <Skull className="mb-6 h-20 w-20 text-gray-400" />
+        <h1 className="mb-2 text-2xl font-bold text-gray-700">
+          당신은 사망하셨습니다
+        </h1>
+        <p className="text-gray-500">저승으로 이동하세요</p>
+      </div>
+    );
+  }
+
+  /* ===================== ALIVE VIEW ===================== */
 
   const myRole = me.getState("role") as AnimalId | null;
 
@@ -156,7 +173,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
                     {biome.name}
                   </span>
 
-                  {/* ================= Status Text (priority-based) ================= */}
+                  {/* ================= Status Text ================= */}
                   {isUnacceptable ? (
                     <span className="mt-2 text-sm font-medium text-gray-400">
                       {biome.name} 이동 불가

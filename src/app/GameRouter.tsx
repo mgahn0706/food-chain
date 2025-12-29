@@ -9,6 +9,7 @@ import MoveBiomePhaseHost from "@/game/ui/moveBiome/MoveBiomePhaseHost";
 import MoveBiomePhasePlayer from "@/game/ui/moveBiome/MoveBiomePhasePlayer";
 import AttackPhaseHost from "@/game/ui/attack/AttackPhaseHost";
 import AttackPhasePlayer from "@/game/ui/attack/AttackPhasePlayer";
+import useDeathToast from "@/game/hooks/useDeathToast";
 
 const BACKGROUND_COLOR = "#F9FAFC";
 
@@ -17,6 +18,7 @@ export default function GameRouter() {
   const isHost = useIsHost();
 
   usePreventUnload();
+  useDeathToast();
 
   return (
     <div

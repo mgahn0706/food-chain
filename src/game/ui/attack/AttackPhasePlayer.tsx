@@ -8,18 +8,36 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { myPlayer, usePlayersList } from "playroomkit";
-import { Hand } from "lucide-react";
+import { Hand, Skull } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
 import type { AnimalId } from "@/game/types/animal";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { BIOMES } from "@/game/config/biome";
 import PlayerHeader from "@/game/components/PlayerHeader";
-import useExecuteAttack from "@/game/hooks/useExecuteAttack"; // ✅ 추가
+import useExecuteAttack from "@/game/hooks/useExecuteAttack";
 
 export default function AttackPhasePlayer({ round }: { round: number }) {
   const me = myPlayer();
   const players = usePlayersList(true);
+
+  const myStatus = me.getState("status");
+
+  /* ===================== DEAD VIEW ===================== */
+  if (myStatus === "DEAD") {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
+        <PlayerHeader />
+        <Skull className="mb-6 h-20 w-20 text-gray-400" />
+        <h1 className="mb-2 text-2xl font-bold text-gray-700">
+          당신은 사망하셨습니다
+        </h1>
+        <p className="text-gray-500">저승으로 이동하세요</p>
+      </div>
+    );
+  }
+
+  /* ===================== ALIVE VIEW ===================== */
 
   const [targetId, setTargetId] = useState<string | null>(null);
 
@@ -54,14 +72,15 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
   /* ===================== Execute Attack Hook ===================== */
 
   const { executeAttack } = useExecuteAttack({
-    attackerId: me.id, // 🔑 공격자 = 나
-    defenderId: targetId, // 🔑 방어자 = 선택한 대상
+    attackerId: me.id,
+    defenderId: targetId,
     round,
   });
 
   return (
     <div className="flex h-full w-full flex-col px-6 py-10">
       <PlayerHeader />
+
       <div className="mx-auto w-full max-w-md">
         {/* ================= Header ================= */}
         <div className="mb-6 text-center">
@@ -88,7 +107,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
         {/* ================= Select ================= */}
         <div className="mb-8 w-full">
           <Select value={targetId ?? ""} onValueChange={setTargetId}>
-            <SelectTrigger className="w-full h-12">
+            <SelectTrigger className="h-12 w-full">
               <SelectValue
                 placeholder={
                   candidates.length === 0
@@ -106,6 +125,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
               ) : (
                 candidates.map((p) => {
                   const role = p.getState("role") as AnimalId | null;
+
                   return (
                     <SelectItem key={p.id} value={p.id}>
                       <div className="flex items-center gap-2">
@@ -128,12 +148,12 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
         <Button
           disabled={!canAttack}
           onClick={() => {
-            executeAttack(); // ✅ 규칙 엔진 실행
-            setTargetId(null); // ✅ UX: 선택 초기화
+            executeAttack();
+            setTargetId(null);
           }}
           className={[
-            "w-full h-14 text-lg font-extrabold tracking-wide",
-            "flex items-center justify-center gap-3",
+            "flex h-14 w-full items-center justify-center gap-3",
+            "text-lg font-extrabold tracking-wide",
             "transition-all duration-150",
 
             canAttack
@@ -144,7 +164,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
                   "shadow-[0_8px_0_#7f1d1d]",
                   "active:shadow-[0_3px_0_#7f1d1d]",
                 ].join(" ")
-              : "bg-gray-300 text-gray-500 cursor-not-allowed shadow-none",
+              : "cursor-not-allowed bg-gray-300 text-gray-500 shadow-none",
           ].join(" ")}
         >
           <Hand className="h-6 w-6" />

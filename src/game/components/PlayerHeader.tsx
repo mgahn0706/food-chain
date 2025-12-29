@@ -22,7 +22,7 @@ export default function PlayerHeader() {
       <div className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-white/80 px-4 py-2 shadow-md backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <h1 className="text-lg font-bold text-gray-800">
-            {myRole ? `당신의 직업` : "관전자 모드"}
+            {myRole ? `추러스 먹이사슬` : "관전자 모드"}
           </h1>
 
           {myRole && (
