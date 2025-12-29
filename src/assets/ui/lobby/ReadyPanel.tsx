@@ -117,8 +117,12 @@ export default function ReadyPanel() {
       {!ready ? (
         <Button
           size="lg"
-          className="h-14 rounded-full text-lg font-bold bg-blue-600 text-white hover:bg-blue-700"
-          onClick={toggleReady}
+          className="h-14 rounded-full text-lg font-bold bg-blue-500 text-white hover:bg-blue-600"
+          onClick={() => {
+            setIsEditing(false);
+            saveName();
+            toggleReady();
+          }}
         >
           준비 완료
         </Button>

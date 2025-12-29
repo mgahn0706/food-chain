@@ -54,7 +54,7 @@ export default function PlayerRow({
             variant={ready ? "default" : "secondary"}
             className={`
             text-xs
-            ${ready ? "bg-blue-600 text-white" : "text-gray-500"}
+            ${ready ? "bg-blue-500 text-white" : "text-gray-500"}
           `}
           >
             {ready ? "준비" : "준비 안 함"}

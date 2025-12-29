@@ -139,7 +139,7 @@ export default function SettingPhase({
             focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
             ${
               canStart
-                ? "bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800"
+                ? "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }
           `}

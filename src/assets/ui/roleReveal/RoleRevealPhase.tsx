@@ -1,8 +1,24 @@
+import { useMemo } from "react";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import type { AnimalId } from "@/game/types/ids";
 import { Smartphone, ArrowRight } from "lucide-react";
-import { myPlayer, useIsHost, usePlayersList } from "playroomkit";
+import {
+  myPlayer,
+  useIsHost,
+  usePlayersList,
+  useMultiplayerState,
+} from "playroomkit";
 import Tilt from "react-parallax-tilt";
+
+// shadcn
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ALL_ANIMALS } from "@/game/config/animals";
 
 export default function RoleRevealPhase({
   onNextPhase,
@@ -11,10 +27,9 @@ export default function RoleRevealPhase({
 }) {
   const isHost = useIsHost();
   const me = myPlayer();
+  const players = usePlayersList(true);
 
   const role = me.getState("role") as AnimalId | null;
-
-  const players = usePlayersList(true);
 
   /* ===================== HOST LOGIC ===================== */
   const uncheckedPlayers = players.filter(
@@ -45,15 +60,12 @@ export default function RoleRevealPhase({
             </p>
           </div>
 
-          {/* 다음 단계 버튼 */}
           <button
             onClick={onNextPhase}
             disabled={!allChecked}
             className={`
-              relative z-10
-              mt-2 inline-flex items-center gap-2
-              rounded-full px-5 py-2
-              text-sm font-medium
+              relative z-10 mt-2 inline-flex items-center gap-2
+              rounded-full px-5 py-2 text-sm font-medium
               transition-colors duration-150
               ${
                 allChecked
@@ -66,13 +78,14 @@ export default function RoleRevealPhase({
             <ArrowRight className="h-4 w-4 pointer-events-none" />
           </button>
 
-          {/* 미확인 플레이어 목록 */}
           {!allChecked && (
             <div className="mt-2 text-sm text-gray-500">
               <p className="mb-1">아직 확인하지 않은 플레이어</p>
               <ul className="list-disc list-inside space-y-1">
                 {uncheckedPlayers.map((p) => (
-                  <li key={p.id}>{p.getProfile().name}</li>
+                  <li key={p.id}>
+                    {p.getState("name") || p.getProfile().name}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -83,7 +96,6 @@ export default function RoleRevealPhase({
           </p>
         </div>
 
-        {/* animation */}
         <style>{`
           @keyframes phoneHint {
             0% { transform: translateY(6px); opacity: 0.5; }
@@ -101,6 +113,23 @@ export default function RoleRevealPhase({
   /* ===================== PLAYER VIEW ===================== */
 
   const checkedRole = me.getState("checkedRole") === true;
+
+  // CHAMELEON
+  const [camouflage, setCamouflage] = useMultiplayerState<string>(
+    "camouflage",
+    ""
+  );
+
+  // CROW
+  const [predict, setPredict] = useMultiplayerState<string>("predict", "");
+
+  const mustPickCamouflage = role === "CHAMELEON";
+  const mustPickPredict = role === "CROW";
+
+  const canConfirm =
+    !checkedRole &&
+    (!mustPickCamouflage || camouflage !== "") &&
+    (!mustPickPredict || predict !== "");
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center px-6 gap-6">
@@ -128,17 +157,75 @@ export default function RoleRevealPhase({
             입니다
           </p>
 
-          {/* 확인 버튼 */}
+          {/* ================= CHAMELEON ================= */}
+          {role === "CHAMELEON" && (
+            <div className="w-full max-w-xs">
+              <p className="mb-2 text-sm text-gray-500">
+                위장할 동물을 선택하세요
+              </p>
+
+              <Select
+                disabled={checkedRole}
+                value={camouflage || undefined}
+                onValueChange={(v) => setCamouflage(v, true)}
+              >
+                <SelectTrigger className="w-full rounded-full">
+                  <SelectValue placeholder="동물 선택" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {ALL_ANIMALS.filter((animal) => animal !== "CHAMELEON").map(
+                    (animal) => (
+                      <SelectItem key={animal} value={animal}>
+                        {animalNameMap[animal]}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* ================= CROW ================= */}
+          {role === "CROW" && (
+            <div className="w-full max-w-xs">
+              <p className="mb-2 text-sm text-gray-500">
+                승리할 것으로 예상되는 동물을 선택하세요
+              </p>
+
+              <Select
+                disabled={checkedRole}
+                value={predict || undefined}
+                onValueChange={(v) => setPredict(v, true)}
+              >
+                <SelectTrigger className="w-full rounded-full">
+                  <SelectValue placeholder="동물 선택" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {ALL_ANIMALS.filter((animal) => animal !== "CROW").map(
+                    (animal) => (
+                      <SelectItem key={animal} value={animal}>
+                        {animalNameMap[animal]}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* ================= 확인 버튼 ================= */}
           <button
-            disabled={checkedRole}
+            disabled={!canConfirm}
             onClick={() => me.setState("checkedRole", true, true)}
             className={`
               mt-2 w-full max-w-xs rounded-full py-3 text-sm font-medium
               transition
               ${
-                checkedRole
-                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700"
+                canConfirm
+                  ? "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }
             `}
           >
