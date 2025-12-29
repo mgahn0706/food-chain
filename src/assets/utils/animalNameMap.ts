@@ -1,4 +1,4 @@
-import type { AnimalId } from "@/game/types/ids";
+import type { AnimalId } from "@/game/types/animal";
 
 export const animalNameMap: Record<AnimalId, string> = {
   LION: "사자",

@@ -1,5 +1,5 @@
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
-import type { AnimalId } from "@/game/types/ids";
+import type { AnimalId } from "@/game/types/animal";
 import { useMultiplayerState, usePlayersList } from "playroomkit";
 
 const usePlayerRole = () => {

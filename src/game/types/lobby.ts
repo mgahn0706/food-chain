@@ -1,4 +1,4 @@
-import type { AnimalId } from "./ids";
+import type { AnimalId } from "./animal";
 
 export type LobbyPhase = "LOBBY" | "INGAME";
 

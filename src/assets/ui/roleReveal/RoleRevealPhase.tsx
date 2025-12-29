@@ -1,13 +1,7 @@
-import { useMemo } from "react";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
-import type { AnimalId } from "@/game/types/ids";
+import type { AnimalId } from "@/game/types/animal";
 import { Smartphone, ArrowRight } from "lucide-react";
-import {
-  myPlayer,
-  useIsHost,
-  usePlayersList,
-  useMultiplayerState,
-} from "playroomkit";
+import { myPlayer, useIsHost, usePlayersList } from "playroomkit";
 import Tilt from "react-parallax-tilt";
 
 // shadcn
@@ -77,23 +71,39 @@ export default function RoleRevealPhase({
             다음 단계
             <ArrowRight className="h-4 w-4 pointer-events-none" />
           </button>
-
           {!allChecked && (
-            <div className="mt-2 text-sm text-gray-500">
-              <p className="mb-1">아직 확인하지 않은 플레이어</p>
-              <ul className="list-disc list-inside space-y-1">
-                {uncheckedPlayers.map((p) => (
-                  <li key={p.id}>
-                    {p.getState("name") || p.getProfile().name}
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-4 w-full max-w-md">
+              <p className="mb-2 text-sm font-medium text-gray-600">
+                아직 확인하지 않은 플레이어
+              </p>
+
+              <div className="flex flex-wrap gap-2 justify-center">
+                {uncheckedPlayers.map((p) => {
+                  const name =
+                    p.getState("name") || p.getProfile().name || "Player";
+
+                  return (
+                    <div
+                      key={p.id}
+                      className="
+              flex items-center gap-2
+              rounded-full px-3 py-1.5
+              text-sm text-gray-700
+              bg-white border border-gray-200
+              shadow-sm
+              hover:border-gray-300 hover:bg-gray-50
+              transition
+            "
+                    >
+                      {/* status dot */}
+                      <span className="h-2 w-2 rounded-full bg-orange-400 animate-pulse" />
+                      <span>{name}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
-
-          <p className="text-xs text-gray-400">
-            모든 플레이어가 확인해야 다음 단계로 넘어갈 수 있습니다.
-          </p>
         </div>
 
         <style>{`
@@ -115,21 +125,18 @@ export default function RoleRevealPhase({
   const checkedRole = me.getState("checkedRole") === true;
 
   // CHAMELEON
-  const [camouflage, setCamouflage] = useMultiplayerState<string>(
-    "camouflage",
-    ""
-  );
+  const camouflage = me.getState("camouflage") as AnimalId | null;
 
   // CROW
-  const [predict, setPredict] = useMultiplayerState<string>("predict", "");
+  const predict = me.getState("predict") as AnimalId | null;
 
   const mustPickCamouflage = role === "CHAMELEON";
   const mustPickPredict = role === "CROW";
 
   const canConfirm =
     !checkedRole &&
-    (!mustPickCamouflage || camouflage !== "") &&
-    (!mustPickPredict || predict !== "");
+    (!mustPickCamouflage || !!camouflage) &&
+    (!mustPickPredict || !!predict);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center px-6 gap-6">
@@ -167,7 +174,7 @@ export default function RoleRevealPhase({
               <Select
                 disabled={checkedRole}
                 value={camouflage || undefined}
-                onValueChange={(v) => setCamouflage(v, true)}
+                onValueChange={(v) => me.setState("camouflage", v, true)}
               >
                 <SelectTrigger className="w-full rounded-full">
                   <SelectValue placeholder="동물 선택" />
@@ -196,7 +203,7 @@ export default function RoleRevealPhase({
               <Select
                 disabled={checkedRole}
                 value={predict || undefined}
-                onValueChange={(v) => setPredict(v, true)}
+                onValueChange={(v) => me.setState("predict", v, true)}
               >
                 <SelectTrigger className="w-full rounded-full">
                   <SelectValue placeholder="동물 선택" />

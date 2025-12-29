@@ -2,15 +2,19 @@ import useGamePhase from "@/game/hooks/useGamePhase";
 import LobbyScreen from "../assets/ui/lobby/LobbyScreen";
 import usePreventUnload from "@/game/hooks/usePreventUnload";
 import AttackPhase from "@/assets/ui/attack/AttackPhase";
-import MoveBiomePhase from "@/assets/ui/moveBiome/MoveBiomePhase";
+import MoveBiomePhase from "@/assets/ui/moveBiome/MoveBiomePhasePlayer";
 import PeekingPhase from "@/assets/ui/peeking/PeekingPhase";
 import ResultPhase from "@/assets/ui/result/ResultPhase";
 import RoleRevealPhase from "@/assets/ui/roleReveal/RoleRevealPhase";
+import { useIsHost } from "playroomkit";
+import MoveBiomePhaseHost from "@/assets/ui/moveBiome/MoveBiomePhaseHost";
+import MoveBiomePhasePlayer from "@/assets/ui/moveBiome/MoveBiomePhasePlayer";
 
 const BACKGROUND_COLOR = "#F9FAFC";
 
 export default function GameRouter() {
   const { phase, round, moveToNextPhase } = useGamePhase();
+  const isHost = useIsHost();
 
   usePreventUnload();
 
@@ -28,9 +32,12 @@ export default function GameRouter() {
 
         {phase === "PEEKING" && <PeekingPhase onNextPhase={moveToNextPhase} />}
 
-        {phase === "MOVE_BIOME" && (
-          <MoveBiomePhase round={round} onNextPhase={moveToNextPhase} />
-        )}
+        {phase === "MOVE_BIOME" &&
+          (isHost ? (
+            <MoveBiomePhaseHost round={round} onNextPhase={moveToNextPhase} />
+          ) : (
+            <MoveBiomePhasePlayer round={round} />
+          ))}
 
         {phase === "ATTACK" && (
           <AttackPhase round={round} onNextPhase={moveToNextPhase} />
