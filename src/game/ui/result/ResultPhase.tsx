@@ -3,5 +3,5 @@ export default function ResultPhase({
 }: {
   onNextPhase: () => void;
 }) {
-  return <div>AttackPhase</div>;
+  return <div onClick={onNextPhase}>Result Phase - Click to proceed</div>;
 }
