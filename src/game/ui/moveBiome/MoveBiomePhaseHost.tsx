@@ -109,7 +109,7 @@ export default function MoveBiomePhaseHost({
                     >
                       {isAnimalRevealed && role && (
                         <img
-                          src={`src/assets/animal/${role}.svg`}
+                          src={`/animal/${role}.svg`}
                           className="h-5 w-5 rounded-full"
                         />
                       )}
@@ -149,7 +149,7 @@ export default function MoveBiomePhaseHost({
                 >
                   {isAnimalRevealed && role && (
                     <img
-                      src={`src/assets/animal/${role}.svg`}
+                      src={`/animal/${role}.svg`}
                       className="h-5 w-5 rounded-full"
                     />
                   )}

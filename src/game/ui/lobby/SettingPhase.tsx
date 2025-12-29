@@ -110,9 +110,9 @@ export default function SettingPhase({
                   `}
                 >
                   <img
-                    src={`src/assets/animal/${animalId}.svg`}
+                    src={`/animal/${animalId}.svg`}
                     alt={animalId}
-                    className="h-8 w-8 shrink-0"
+                    className="h-8 w-8 shrink-0 rounded-sm"
                   />
                   <span className="text-sm font-medium truncate text-gray-900">
                     {animalNameMap[animalId]}

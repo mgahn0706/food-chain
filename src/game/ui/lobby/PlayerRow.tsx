@@ -22,8 +22,8 @@ export default function PlayerRow({
     1;
 
   const iconSrc = isHost
-    ? "src/assets/user/host-icon.png"
-    : `src/assets/user/user-icon-${userIconIndex}.png`;
+    ? "/user/host-icon.png"
+    : `/user/user-icon-${userIconIndex}.png`;
 
   return (
     <div

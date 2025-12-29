@@ -124,7 +124,7 @@ export default function AttackPhaseHost({
                     >
                       {isAnimalRevealed && role && (
                         <img
-                          src={`src/assets/animal/${role}.svg`}
+                          src={`s/animal/${role}.svg`}
                           className="h-5 w-5 rounded-full"
                         />
                       )}

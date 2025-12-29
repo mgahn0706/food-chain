@@ -133,7 +133,7 @@ export default function PeekingPhase({
                       <Tilt scale={1.05}>
                         <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border bg-gray-50 px-5 py-4 text-center">
                           <img
-                            src={`src/assets/animal/${revealedRoles[idx]}.svg`}
+                            src={`/animal/${revealedRoles[idx]}.svg`}
                             className="h-20 w-20"
                           />
                           <p className="mt-2 text-sm text-gray-700">

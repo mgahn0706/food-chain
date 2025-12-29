@@ -56,7 +56,7 @@ export default function PlayerHeader() {
               {/* 카드 이미지 (확장 포인트) */}
               <div className="flex h-32 w-32 items-center justify-center rounded-xl bg-gray-100 shadow-inner">
                 <img
-                  src={`src/assets/animal/${myRole}.svg`}
+                  src={`/animal/${myRole}.svg`}
                   alt={myRole}
                   className="h-20 w-20"
                 />

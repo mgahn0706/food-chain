@@ -149,7 +149,7 @@ export default function RoleRevealPhase({
             transitionSpeed={600}
           >
             <img
-              src={`src/assets/animal/${role}.svg`}
+              src={`/animal/${role}.svg`}
               alt="role reveal"
               className="h-32 w-32 md:h-40 md:w-40 select-none"
               draggable={false}
