@@ -57,7 +57,7 @@ export default function useCheckHasEaten({ round }: { round: number }) {
 
         nextLogs.push({
           round,
-          type: "KILL",
+          type: "STARVE",
           attackerId: undefined,
           defenderId: p.id,
           message: `${p.getState("name")}님이 굶어 죽었습니다.`,

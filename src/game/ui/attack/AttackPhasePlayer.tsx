@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { myPlayer, usePlayersList } from "playroomkit";
-import { Hand, Skull } from "lucide-react";
+import { Hand } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
 import type { AnimalId } from "@/game/types/animal";
@@ -16,6 +16,7 @@ import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { BIOMES } from "@/game/config/biome";
 import PlayerHeader from "@/game/components/PlayerHeader";
 import useExecuteAttack from "@/game/hooks/useExecuteAttack";
+import DeathScreen from "@/game/components/DeathScreen";
 
 export default function AttackPhasePlayer({ round }: { round: number }) {
   const me = myPlayer();
@@ -65,16 +66,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
 
   /* ===================== DEAD VIEW ===================== */
   if (myStatus === "DEAD") {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
-        <PlayerHeader />
-        <Skull className="mb-6 h-20 w-20 text-gray-400" />
-        <h1 className="mb-2 text-2xl font-bold text-gray-700">
-          당신은 사망하셨습니다
-        </h1>
-        <p className="text-gray-500">저승으로 이동하세요</p>
-      </div>
-    );
+    return <DeathScreen round={round} currentPhase="공격 단계" />;
   }
 
   return (

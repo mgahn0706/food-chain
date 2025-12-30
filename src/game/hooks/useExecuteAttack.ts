@@ -68,7 +68,7 @@ export default function useExecuteAttack({
     /* ===== 🐍 snake counter ===== */
     if (defenderRole === "SNAKE") {
       killPlayer(attacker.id);
-      pushLog("KILL", `${attackerName}님이 반격으로 사망했습니다.`, {
+      pushLog("KILL", `${attackerName}님이 사망했습니다.`, {
         attackerId: defender.id,
         defenderId: attacker.id,
       });

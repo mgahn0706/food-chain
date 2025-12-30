@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { BIOMES } from "@/game/config/biome";
 import useCheckHasEaten from "@/game/hooks/useCheckHasEaten";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
+import AttackLogSidebar from "@/game/components/AttackLogSidebar";
+
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
+
 import { Eye, EyeOff, Skull } from "lucide-react";
 import { usePlayersList } from "playroomkit";
 import { useEffect, useMemo, useState } from "react";
@@ -32,7 +35,6 @@ export default function AttackPhaseHost({
 
   const hostId = useSyncHostId();
   const playersAll = usePlayersList(true);
-
   const { checkHasEaten } = useCheckHasEaten({ round });
 
   const players = useMemo(
@@ -57,6 +59,7 @@ export default function AttackPhaseHost({
     return players.reduce((acc, p) => {
       const status = p.getState("status") as PlayerStatus | null;
 
+      // ☠️ 사망자는 무조건 저승
       if (status === "DEAD") {
         return { ...acc, DEAD: [...acc.DEAD, p] };
       }
@@ -77,12 +80,13 @@ export default function AttackPhaseHost({
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
-      {/* Header */}
+      {/* ================= Header ================= */}
       <div className="mb-8 flex items-end justify-between">
         <div>
           <p className="text-sm text-gray-400">{round} 라운드</p>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">공격 진행 상황</h1>
+
             <button
               onClick={() => setIsAnimalRevealed((v) => !v)}
               className="text-gray-400 hover:text-gray-700 transition-colors"
@@ -96,12 +100,19 @@ export default function AttackPhaseHost({
           </div>
         </div>
 
-        <div className="tabular-nums text-sm font-medium text-gray-500">
-          {mm}:{ss}
+        {/* 👉 우측 컨트롤 영역 */}
+        <div className="flex items-center gap-2">
+          {/* 🔥 공격 로그 Sidebar 버튼 */}
+          <AttackLogSidebar />
+
+          {/* 타이머 */}
+          <div className="tabular-nums text-sm font-medium text-gray-500">
+            {mm}:{ss}
+          </div>
         </div>
       </div>
 
-      {/* Biomes */}
+      {/* ================= Biomes ================= */}
       <div className="space-y-4">
         {Object.values(BIOMES).map((biome) => (
           <div
@@ -120,6 +131,7 @@ export default function AttackPhaseHost({
               <div className="mt-3 flex flex-wrap gap-2">
                 {grouped[biome.id].map((p) => {
                   const role = p.getState("role") as AnimalId | null;
+
                   return (
                     <div
                       key={p.id}
@@ -131,9 +143,13 @@ export default function AttackPhaseHost({
                           className="h-5 w-5 rounded-full"
                         />
                       )}
-                      {p.getState("name") || p.getProfile().name}
+
+                      <span className="whitespace-nowrap">
+                        {p.getState("name") || p.getProfile().name}
+                      </span>
+
                       {isAnimalRevealed && role && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
                           {animalNameMap[role]}
                         </span>
                       )}
@@ -145,7 +161,7 @@ export default function AttackPhaseHost({
           </div>
         ))}
 
-        {/* DEAD */}
+        {/* ================= DEAD / HELL ================= */}
         <div className="rounded-xl bg-gray-200 px-6 py-5">
           <div className="mb-3 flex items-center gap-2 text-gray-700">
             <Skull className="h-5 w-5" />
@@ -155,6 +171,7 @@ export default function AttackPhaseHost({
           <div className="flex flex-wrap gap-2">
             {grouped.DEAD.map((p) => {
               const role = p.getState("role") as AnimalId | null;
+
               return (
                 <div
                   key={p.id}
@@ -183,6 +200,7 @@ export default function AttackPhaseHost({
         </div>
       </div>
 
+      {/* ================= Footer ================= */}
       <div className="mt-10 flex justify-center">
         <Button
           className="bg-blue-500 text-white hover:bg-blue-600"

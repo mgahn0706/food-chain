@@ -1,12 +1,13 @@
 import React from "react";
 import { myPlayer, usePlayerState } from "playroomkit";
-import { Cloud, Wheat, Trees, Waves, Skull } from "lucide-react";
+import { Cloud, Wheat, Trees, Waves } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
 import { BIOMES } from "@/game/config/biome";
 import type { AnimalId } from "@/game/types/animal";
 import { ANIMALS } from "@/game/config/animals";
 import PlayerHeader from "@/game/components/PlayerHeader";
+import DeathScreen from "@/game/components/DeathScreen";
 
 /* ===================== utils ===================== */
 
@@ -42,16 +43,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
 
   /* ===================== DEAD VIEW ===================== */
   if (myStatus === "DEAD") {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center px-6 text-center">
-        <PlayerHeader />
-        <Skull className="mb-6 h-20 w-20 text-gray-400" />
-        <h1 className="mb-2 text-2xl font-bold text-gray-700">
-          당신은 사망하셨습니다
-        </h1>
-        <p className="text-gray-500">저승으로 이동하세요</p>
-      </div>
-    );
+    return <DeathScreen round={round} currentPhase="장소 이동 단계" />;
   }
 
   /* ===================== ALIVE VIEW ===================== */

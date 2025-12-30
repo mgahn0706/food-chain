@@ -1,4 +1,4 @@
-import { myPlayer } from "playroomkit";
+import { getRoomCode, myPlayer } from "playroomkit";
 import PlayerList from "./PlayerList";
 import ReadyPanel from "./ReadyPanel";
 import SettingPhase from "./SettingPhase";
@@ -14,8 +14,18 @@ export default function LobbyScreen({
 
   const isHost = my.id === hostId;
 
+  const roomCode = getRoomCode();
+
   return (
     <div className="flex h-full w-full flex-col gap-6 px-6 py-4">
+      {isHost && (
+        <div className="text-center text-sm text-gray-500">
+          주소:{" "}
+          <span className="font-mono font-bold">
+            https://food-chain-genius.vercel.app/#r=R{roomCode}
+          </span>
+        </div>
+      )}
       <PlayerList />
 
       {!isHost && <ReadyPanel />}
