@@ -20,7 +20,7 @@ export default function PlayerList() {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3">
         {[...players].reverse().map((p) => (
           <PlayerRow key={p.id} player={p} isHost={p.id === hostId} />
         ))}

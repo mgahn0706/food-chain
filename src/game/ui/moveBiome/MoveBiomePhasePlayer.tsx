@@ -86,7 +86,6 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
 
   return (
     <div className="flex h-full w-full flex-col px-6 py-6">
-      <PlayerHeader />
       <style>{`
         @keyframes gradientWave {
           0%   { background-position: 0% 50%; }
@@ -97,6 +96,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
 
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col">
         {/* ================= Header ================= */}
+        <PlayerHeader />
         <div className="mb-4 text-center">
           <p className="text-sm text-gray-400">{round} 라운드</p>
           {selectedBiome ? (

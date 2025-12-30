@@ -15,7 +15,6 @@ import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { BIOMES } from "@/game/config/biome";
 import type { BiomeId } from "@/game/types/biome";
 import { ANIMALS } from "../config/animals";
-import { Description } from "@radix-ui/react-dialog";
 
 /* ===================== constants ===================== */
 
