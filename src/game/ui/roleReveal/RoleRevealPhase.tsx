@@ -125,10 +125,10 @@ export default function RoleRevealPhase({
   const checkedRole = me.getState("checkedRole") === true;
 
   // CHAMELEON
-  const camouflage = me.getState("camouflage") as AnimalId | null;
+  const camouflage = me.getState("camouflagedTo") as AnimalId | null;
 
   // CROW
-  const predict = me.getState("predict") as AnimalId | null;
+  const predict = me.getState("predictWinner") as AnimalId | null;
 
   const mustPickCamouflage = role === "CHAMELEON";
   const mustPickPredict = role === "CROW";
@@ -174,7 +174,7 @@ export default function RoleRevealPhase({
               <Select
                 disabled={checkedRole}
                 value={camouflage || undefined}
-                onValueChange={(v) => me.setState("camouflage", v, true)}
+                onValueChange={(v) => me.setState("camouflagedTo", v, true)}
               >
                 <SelectTrigger className="w-full rounded-full">
                   <SelectValue placeholder="동물 선택" />
@@ -203,7 +203,7 @@ export default function RoleRevealPhase({
               <Select
                 disabled={checkedRole}
                 value={predict || undefined}
-                onValueChange={(v) => me.setState("predict", v, true)}
+                onValueChange={(v) => me.setState("predictWinner", v, true)}
               >
                 <SelectTrigger className="w-full rounded-full">
                   <SelectValue placeholder="동물 선택" />

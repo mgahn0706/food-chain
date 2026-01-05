@@ -128,8 +128,8 @@ export default function ResultPhase({
       p.setState("predictedWinner", null);
       p.setState("result", null);
       p.setState("hasEaten", [false, false, false, false]);
-      p.setState("checked", false);
-      p.setState("camouflage", null);
+      p.setState("checkedRole", false);
+      p.setState("camouflagedTo", null);
       p.setState("ready", false);
     });
   };

@@ -95,7 +95,7 @@ export default function PeekingPhase({
       if (!role) return null;
 
       if (role === "CHAMELEON") {
-        return (p.getState("camouflage") as AnimalId | null) || "CHAMELEON";
+        return (p.getState("camouflagedTo") as AnimalId | null) || "CHAMELEON";
       }
 
       return role;
