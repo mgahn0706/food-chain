@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -11,8 +11,7 @@ import { myPlayer, usePlayersList } from "playroomkit";
 import { Hand } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
-import type { AnimalId } from "@/game/types/animal";
-import { animalNameMap } from "@/assets/utils/animalNameMap";
+
 import { BIOMES } from "@/game/config/biome";
 import PlayerHeader from "@/game/components/PlayerHeader";
 import useExecuteAttack from "@/game/hooks/useExecuteAttack";
@@ -24,10 +23,22 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
 
   const myStatus = me.getState("status");
 
+  /* ===================== TIMER ===================== */
+
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    setSeconds(0);
+    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [round]);
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
   /* ===================== ALIVE VIEW ===================== */
 
   const [targetId, setTargetId] = useState<string | null>(null);
-
   const roundIndex = round - 1;
 
   /* ===================== My biome ===================== */
@@ -56,7 +67,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
 
   const canAttack = !!targetId && candidates.length > 0;
 
-  /* ===================== Execute Attack Hook ===================== */
+  /* ===================== Execute Attack ===================== */
 
   const { executeAttack } = useExecuteAttack({
     attackerId: me.id,
@@ -65,6 +76,7 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
   });
 
   /* ===================== DEAD VIEW ===================== */
+
   if (myStatus === "DEAD") {
     return <DeathScreen round={round} currentPhase="공격 단계" />;
   }
@@ -78,6 +90,11 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
         <div className="mb-6 text-center">
           <p className="text-sm text-gray-400">{round} 라운드</p>
           <h1 className="mt-1 text-2xl font-bold">공격 대상을 선택하세요</h1>
+
+          {/* 타이머 */}
+          <div className="mt-1 tabular-nums text-sm font-medium text-gray-500">
+            {mm}:{ss}
+          </div>
 
           {/* 현재 바이옴 */}
           <div className="mt-4 flex justify-center">
@@ -115,22 +132,11 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
                   공격 가능한 대상이 없습니다
                 </SelectItem>
               ) : (
-                candidates.map((p) => {
-                  const role = p.getState("role") as AnimalId | null;
-
-                  return (
-                    <SelectItem key={p.id} value={p.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{p.getState("name") || p.getProfile().name}</span>
-                        {role && (
-                          <span className="text-xs text-gray-500">
-                            {animalNameMap[role]}
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  );
-                })
+                candidates.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.getState("name") || p.getProfile().name}
+                  </SelectItem>
+                ))
               )}
             </SelectContent>
           </Select>
@@ -147,7 +153,6 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
             "flex h-14 w-full items-center justify-center gap-3",
             "text-lg font-extrabold tracking-wide",
             "transition-all duration-150",
-
             canAttack
               ? [
                   "bg-red-600 text-white",

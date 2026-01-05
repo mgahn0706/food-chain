@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { AnimalId } from "../types/animal";
 import type { AttackLog } from "../types/attackLog";
 import { IdCard, Skull } from "lucide-react";
+import Tilt from "react-parallax-tilt";
 
 import {
   Dialog,
@@ -58,7 +59,7 @@ export default function PlayerHeader() {
   /* ===================== death logs ===================== */
 
   const deathLogs = attackLogs.filter(
-    (log) => log.type === "KILL" && log.defenderId
+    (log) => (log.type === "KILL" || log.type === "STARVE") && log.defenderId
   );
 
   const resolveDeathText = (log: AttackLog) => {
@@ -72,7 +73,7 @@ export default function PlayerHeader() {
     const biomeId = biomeHistory[log.round - 1];
     if (!biomeId) return null;
 
-    return `${name}님이 ${BIOMES[biomeId].name}에서 사망했습니다.`;
+    return `${log.round}라운드에 ${name}님이 ${BIOMES[biomeId].name}에서 사망했습니다.`;
   };
 
   return (
@@ -128,20 +129,27 @@ export default function PlayerHeader() {
           {myRole && (
             <div className="mt-4 flex flex-col items-center gap-4">
               {/* 이미지 */}
-              <div className="flex h-32 w-32 items-center justify-center rounded-xl bg-gray-100 shadow-inner">
+              <Tilt
+                tiltMaxAngleX={12}
+                tiltMaxAngleY={12}
+                scale={1.1}
+                transitionSpeed={600}
+              >
                 <img
-                  src={`/animal/${myRole}.svg`}
+                  src={`/card/${myRole}.png`}
                   alt={myRole}
-                  className="h-20 w-20"
+                  className="h-68 w-48"
                 />
-              </div>
+              </Tilt>
 
               {/* 이름 */}
               <div className="text-center">
                 <p className="text-lg font-extrabold">
                   {animalNameMap[myRole]}
                 </p>
-                <p className="text-sm text-gray-500">당신의 역할입니다</p>
+                <p className="text-sm text-gray-500">
+                  이 카드를 임의로 다른 플레이어에게 보여줄 수 없습니다.
+                </p>
               </div>
 
               {/* 🍖 hasEaten visualization */}

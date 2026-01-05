@@ -1,3 +1,5 @@
+import type { GamePlayer } from "../ui/result/ResultPhase";
+
 export type BiomeId = "RIVER" | "FIELD" | "FOREST" | "SKY";
 
 export type AnimalId =
@@ -37,5 +39,5 @@ export interface Animal {
   peekingCount: 1 | 2;
   rank: number;
   unacceptableBiomes: BiomeId[];
-  onVictoryCheck: (players: Player[]) => boolean;
+  onVictoryCheck: (players: GamePlayer[]) => boolean;
 }

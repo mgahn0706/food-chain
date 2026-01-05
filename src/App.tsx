@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { insertCoin } from "playroomkit";
 import GameRouter from "./app/GameRouter";
+import { Toaster } from "sonner";
 
 export default function App() {
   const [connected, setConnected] = useState(false);
@@ -43,5 +44,10 @@ export default function App() {
     );
   }
 
-  return <GameRouter />;
+  return (
+    <>
+      <GameRouter />
+      <Toaster />
+    </>
+  );
 }

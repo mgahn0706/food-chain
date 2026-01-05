@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { myPlayer, usePlayerState } from "playroomkit";
 import { Cloud, Wheat, Trees, Waves } from "lucide-react";
 
@@ -38,10 +38,23 @@ const BIOME_UI: Record<BiomeId, { icon: React.ElementType }> = {
 
 export default function MoveBiomePhasePlayer({ round }: { round: number }) {
   const me = myPlayer();
-
   const myStatus = me.getState("status");
 
+  /* ===================== TIMER ===================== */
+
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    setSeconds(0);
+    const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => window.clearInterval(id);
+  }, [round]);
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
   /* ===================== DEAD VIEW ===================== */
+
   if (myStatus === "DEAD") {
     return <DeathScreen round={round} currentPhase="장소 이동 단계" />;
   }
@@ -67,7 +80,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
 
   const prevBiome = roundIndex > 0 ? biomeHistory[roundIndex - 1] : null;
 
-  // 🔑 이전 라운드에서 주 서식지가 아니면 → 강제 복귀
+  // 이전 라운드에서 주 서식지가 아니면 → 강제 복귀
   const mustReturnToMain = prevBiome !== null && prevBiome !== mainHabitat;
 
   const selectBiome = (biomeId: BiomeId) => {
@@ -89,11 +102,18 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col">
         {/* ================= Header ================= */}
         <PlayerHeader />
+
         <div className="mb-4 text-center">
           <p className="text-sm text-gray-400">{round} 라운드</p>
+
+          {/* 타이머 */}
+          <div className="mt-1 tabular-nums text-sm font-medium text-gray-500">
+            {mm}:{ss}
+          </div>
+
           {selectedBiome ? (
             <div className="flex justify-center">
-              <h1 className={`mt-1 text-2xl font-bold tracking-tight`}>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight">
                 {BIOMES[selectedBiome].name}
               </h1>
               <h1 className="mt-1 text-2xl font-medium tracking-tight">
@@ -114,17 +134,12 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
         <div className="grid flex-1 grid-cols-2 grid-rows-2 gap-6">
           {Object.values(BIOMES).map((biome) => {
             const Icon = BIOME_UI[biome.id].icon;
-
             const isSelected = selectedBiome === biome.id;
 
-            // 1️⃣ 종족 고유 불가
             const isUnacceptable = unacceptableBiomes.includes(biome.id);
-
-            // 2️⃣ 주 서식지 강제 복귀
             const isForcedDisabled =
               mustReturnToMain && biome.id !== mainHabitat;
 
-            // 🔑 최종 disable
             const isDisabled = isUnacceptable || isForcedDisabled;
 
             return (
@@ -134,9 +149,7 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
                 onClick={() => !isDisabled && selectBiome(biome.id)}
                 className={[
                   "relative flex h-full flex-col items-center justify-center rounded-2xl",
-                  "transition-colors duration-300 ease-out",
-                  "ring-4",
-
+                  "transition-colors duration-300 ease-out ring-4",
                   isDisabled
                     ? "cursor-not-allowed bg-gray-100 ring-gray-200 text-gray-400"
                     : isSelected
@@ -182,7 +195,6 @@ export default function MoveBiomePhasePlayer({ round }: { round: number }) {
                     {biome.name}
                   </span>
 
-                  {/* ================= Status Text ================= */}
                   {isUnacceptable ? (
                     <span className="mt-2 text-sm font-medium text-gray-400">
                       {biome.name} 이동 불가

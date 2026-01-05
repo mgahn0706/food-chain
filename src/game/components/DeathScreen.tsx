@@ -31,12 +31,27 @@ export default function DeathScreen({
     // 나를 죽인 가장 마지막 로그
     const myDeathLog = [...attackLogs]
       .reverse()
-      .find((log) => log.type === "KILL" && log.defenderId === me.id);
+      .find(
+        (log) =>
+          (log.type === "KILL" || log.type === "STARVE") &&
+          log.defenderId === me.id
+      );
 
     if (!myDeathLog) {
       return {
         title: "사망 원인을 알 수 없습니다",
         detail: "알 수 없는 이유로 사망했습니다.",
+      };
+    }
+
+    if (myDeathLog.type === "STARVE") {
+      const history = (me.getState("biomeHistory") as (BiomeId | null)[]) ?? [];
+      const biomeId = history[myDeathLog.round - 1];
+      const biomeName = biomeId ? BIOMES[biomeId].name : "알 수 없는 장소";
+
+      return {
+        title: "굶주림으로 사망",
+        detail: `${biomeName}에서 먹이를 찾지 못해 굶어 죽었습니다.`,
       };
     }
 

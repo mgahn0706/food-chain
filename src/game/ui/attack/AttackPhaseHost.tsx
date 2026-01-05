@@ -9,10 +9,19 @@ import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
 
 import { Eye, EyeOff, Skull } from "lucide-react";
-import { usePlayersList } from "playroomkit";
+import { usePlayersList, useMultiplayerState } from "playroomkit";
 import { useEffect, useMemo, useState } from "react";
 
+import { toast } from "sonner";
+
 type PlayerStatus = "ALIVE" | "DEAD";
+
+type AttackLog = {
+  round: number;
+  attacker: AnimalId;
+  target: AnimalId;
+  result: "SUCCESS" | "FAIL" | "DEAD";
+};
 
 export default function AttackPhaseHost({
   round,
@@ -21,6 +30,7 @@ export default function AttackPhaseHost({
   round: number;
   onNextPhase: () => void;
 }) {
+  /* ===================== Timer ===================== */
   const [seconds, setSeconds] = useState(0);
   const [isAnimalRevealed, setIsAnimalRevealed] = useState(true);
 
@@ -33,6 +43,7 @@ export default function AttackPhaseHost({
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
   const ss = String(seconds % 60).padStart(2, "0");
 
+  /* ===================== Multiplayer ===================== */
   const hostId = useSyncHostId();
   const playersAll = usePlayersList(true);
   const { checkHasEaten } = useCheckHasEaten({ round });
@@ -44,8 +55,23 @@ export default function AttackPhaseHost({
 
   const roundIndex = round - 1;
 
-  /* ===================== IMMUTABLE GROUPING ===================== */
+  /* ===================== Attack Log Toast ===================== */
+  const [attackLogs] = useMultiplayerState<AttackLog[]>("attackLogs", []);
 
+  useEffect(() => {
+    const log = attackLogs.at(-1);
+    if (!log) return;
+
+    // ✅ 현재 라운드 로그만 토스트
+    if (log.round !== round) return;
+
+    // ✅ 방어 코드 (undefined 방지)
+    if (!log.attacker || !log.target || !log.result) return;
+
+    showAttackToast(log);
+  }, [attackLogs, round]);
+
+  /* ===================== Grouping ===================== */
   const grouped = useMemo(() => {
     const initial: Record<BiomeId | "NONE" | "DEAD", typeof players> = {
       SKY: [],
@@ -59,25 +85,25 @@ export default function AttackPhaseHost({
     return players.reduce((acc, p) => {
       const status = p.getState("status") as PlayerStatus | null;
 
-      // ☠️ 사망자는 무조건 저승
       if (status === "DEAD") {
-        return { ...acc, DEAD: [...acc.DEAD, p] };
+        acc.DEAD.push(p);
+        return acc;
       }
 
       const history = (p.getState("biomeHistory") as (BiomeId | null)[]) ?? [];
       const biome = history[roundIndex];
 
       if (!biome) {
-        return { ...acc, NONE: [...acc.NONE, p] };
+        acc.NONE.push(p);
+        return acc;
       }
 
-      return {
-        ...acc,
-        [biome]: [...acc[biome], p],
-      };
+      acc[biome].push(p);
+      return acc;
     }, initial);
   }, [players, roundIndex]);
 
+  /* ===================== Render ===================== */
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
       {/* ================= Header ================= */}
@@ -89,7 +115,7 @@ export default function AttackPhaseHost({
 
             <button
               onClick={() => setIsAnimalRevealed((v) => !v)}
-              className="text-gray-400 hover:text-gray-700 transition-colors"
+              className="text-gray-400 transition-colors hover:text-gray-700"
             >
               {isAnimalRevealed ? (
                 <Eye className="h-5 w-5" />
@@ -100,12 +126,8 @@ export default function AttackPhaseHost({
           </div>
         </div>
 
-        {/* 👉 우측 컨트롤 영역 */}
         <div className="flex items-center gap-2">
-          {/* 🔥 공격 로그 Sidebar 버튼 */}
           <AttackLogSidebar />
-
-          {/* 타이머 */}
           <div className="tabular-nums text-sm font-medium text-gray-500">
             {mm}:{ss}
           </div>
@@ -149,7 +171,7 @@ export default function AttackPhaseHost({
                       </span>
 
                       {isAnimalRevealed && role && (
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                        <span className="whitespace-nowrap text-xs text-gray-500">
                           {animalNameMap[role]}
                         </span>
                       )}
@@ -161,7 +183,7 @@ export default function AttackPhaseHost({
           </div>
         ))}
 
-        {/* ================= DEAD / HELL ================= */}
+        {/* ================= DEAD ================= */}
         <div className="rounded-xl bg-gray-200 px-6 py-5">
           <div className="mb-3 flex items-center gap-2 text-gray-700">
             <Skull className="h-5 w-5" />
@@ -189,7 +211,7 @@ export default function AttackPhaseHost({
                   </span>
 
                   {isAnimalRevealed && role && (
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                    <span className="whitespace-nowrap text-xs text-gray-500">
                       {animalNameMap[role]}
                     </span>
                   )}
@@ -215,6 +237,27 @@ export default function AttackPhaseHost({
     </div>
   );
 }
+
+/* ===================== Toast Helper ===================== */
+
+function showAttackToast(log: AttackLog) {
+  const attacker = animalNameMap[log.attacker] ?? log.attacker;
+  const target = animalNameMap[log.target] ?? log.target;
+
+  if (log.result === "DEAD") {
+    toast.error(`${attacker} → ${target} ☠️ 사망`, { duration: 3000 });
+    return;
+  }
+
+  if (log.result === "SUCCESS") {
+    toast.success(`${attacker} → ${target} 성공`, { duration: 2500 });
+    return;
+  }
+
+  toast(`${attacker} → ${target} 실패`, { duration: 2000 });
+}
+
+/* ===================== Style ===================== */
 
 function biomeGradient(color: string) {
   return {

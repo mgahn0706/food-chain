@@ -145,13 +145,13 @@ export default function RoleRevealPhase({
           <Tilt
             tiltMaxAngleX={12}
             tiltMaxAngleY={12}
-            scale={1.08}
+            scale={1.1}
             transitionSpeed={600}
           >
             <img
-              src={`/animal/${role}.svg`}
+              src={`/card/${role}.png`}
               alt="role reveal"
-              className="h-32 w-32 md:h-40 md:w-40 select-none"
+              className="h-68 w-48 md:h-68 md:w-48 select-none"
               draggable={false}
             />
           </Tilt>
