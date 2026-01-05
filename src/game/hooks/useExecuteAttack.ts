@@ -92,7 +92,7 @@ export default function useExecuteAttack({
       });
 
       if (isAllInSameBiome) {
-        pushLog("IMMUNE", "아무 일도 일어나지 않았습니다. (무적)", {
+        pushLog("IMMUNE", "아무 일도 일어나지 않았습니다.", {
           attackerId,
           defenderId,
         });

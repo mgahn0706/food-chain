@@ -134,8 +134,8 @@ export default function ResultPhase({
       p.setState("checkedRole", false);
       p.setState("camouflagedTo", null);
       p.setState("ready", false);
-      setAttackLogs([]);
     });
+    setAttackLogs([]);
   };
 
   return (
