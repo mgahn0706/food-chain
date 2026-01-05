@@ -1,5 +1,5 @@
 import { Trophy } from "lucide-react";
-import { myPlayer, usePlayersList } from "playroomkit";
+import { myPlayer, useMultiplayerState, usePlayersList } from "playroomkit";
 
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 
@@ -22,6 +22,7 @@ import { ANIMALS } from "@/game/config/animals";
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
 import AttackLogSidebar from "@/game/components/AttackLogSidebar";
+import type { AttackLog } from "@/game/types/attackLog";
 
 /* ===================== Types ===================== */
 
@@ -48,6 +49,8 @@ export default function ResultPhase({
   const hostId = useSyncHostId();
 
   const isHost = me.id === hostId;
+
+  const [, setAttackLogs] = useMultiplayerState<AttackLog[]>("attackLogs", []);
 
   /* ---------- normalize ---------- */
   const gamePlayers: GamePlayer[] = players.map((p) => ({
@@ -131,6 +134,7 @@ export default function ResultPhase({
       p.setState("checkedRole", false);
       p.setState("camouflagedTo", null);
       p.setState("ready", false);
+      setAttackLogs([]);
     });
   };
 
