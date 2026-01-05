@@ -1,4 +1,4 @@
-import { Trophy, Skull } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { myPlayer, usePlayersList } from "playroomkit";
 
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
