@@ -5,10 +5,18 @@ import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
 import { Eye, EyeOff, Skull } from "lucide-react";
-import { usePlayersList } from "playroomkit";
+import { usePlayersList, useMultiplayerState } from "playroomkit";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 type PlayerStatus = "ALIVE" | "DEAD";
+
+type AttackLog = {
+  round: number;
+  attacker: AnimalId;
+  target: AnimalId;
+  result: "SUCCESS" | "FAIL" | "DEAD";
+};
 
 export default function MoveBiomePhaseHost({
   round,
@@ -38,6 +46,23 @@ export default function MoveBiomePhaseHost({
   );
 
   const roundIndex = round - 1;
+
+  /* ===================== Attack Log Toast ===================== */
+
+  const [attackLogs] = useMultiplayerState<AttackLog[]>("attackLogs", []);
+
+  useEffect(() => {
+    const log = attackLogs.at(-1);
+    if (!log) return;
+
+    // 현재 라운드 로그만
+    if (log.round !== round) return;
+
+    // 방어
+    if (!log.attacker || !log.target || !log.result) return;
+
+    showAttackToast(log);
+  }, [attackLogs, round]);
 
   /* ===================== IMMUTABLE GROUPING ===================== */
 
@@ -228,6 +253,25 @@ export default function MoveBiomePhaseHost({
       </div>
     </div>
   );
+}
+
+/* ===================== Toast Helper ===================== */
+
+function showAttackToast(log: AttackLog) {
+  const attacker = animalNameMap[log.attacker] ?? log.attacker;
+  const target = animalNameMap[log.target] ?? log.target;
+
+  if (log.result === "DEAD") {
+    toast.error(`${attacker} → ${target} ☠️ 사망`, { duration: 3000 });
+    return;
+  }
+
+  if (log.result === "SUCCESS") {
+    toast.success(`${attacker} → ${target} 성공`, { duration: 2500 });
+    return;
+  }
+
+  toast(`${attacker} → ${target} 실패`, { duration: 2000 });
 }
 
 function biomeGradient(color: string) {
