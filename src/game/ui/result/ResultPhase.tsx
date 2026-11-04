@@ -53,14 +53,17 @@ export default function ResultPhase({
   const [, setAttackLogs] = useMultiplayerState<AttackLog[]>("attackLogs", []);
 
   /* ---------- normalize ---------- */
-  const gamePlayers: GamePlayer[] = players.map((p) => ({
-    id: p.id,
-    name: p.getState("name"),
-    role: p.getState("role"),
-    status: p.getState("status"),
-    biomeHistory: p.getState("biomeHistory") ?? [],
-    predictedWinner: p.getState("predictedWinner"),
-  }));
+  const gamePlayers: GamePlayer[] = players
+    .filter((player) => player.id !== hostId && player.getState("role"))
+    .map((player) => ({
+      id: player.id,
+      name: player.getState("name"),
+      role: player.getState("role"),
+      status: player.getState("status"),
+      biomeHistory: player.getState("biomeHistory") ?? [],
+      predictedWinner:
+        player.getState("predictedWinner") ?? player.getState("predictWinner"),
+    }));
 
   /* ---------- victory judgment ---------- */
   const winners = gamePlayers.filter(
@@ -129,6 +132,7 @@ export default function ResultPhase({
       p.setState("status", "ALIVE");
       p.setState("biomeHistory", []);
       p.setState("predictedWinner", null);
+      p.setState("predictWinner", null);
       p.setState("result", null);
       p.setState("hasEaten", [false, false, false, false]);
       p.setState("checkedRole", false);

@@ -1,4 +1,3 @@
-// game/state/useHost.ts
 import { useEffect } from "react";
 import { useIsHost, myPlayer, useMultiplayerState } from "playroomkit";
 
@@ -12,10 +11,10 @@ export function useSyncHostId() {
   );
 
   useEffect(() => {
-    if (isHost && my.id) {
-      setHostId(my.id);
+    if (isHost && my.id && hostId !== my.id) {
+      setHostId(my.id, true);
     }
-  }, [isHost, my.id, setHostId]);
+  }, [isHost, my.id, hostId, setHostId]);
 
-  return hostId;
+  return isHost ? my.id : hostId;
 }

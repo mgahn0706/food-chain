@@ -77,19 +77,27 @@ export default function useExecuteAttack({
 
     /* ===== 🛡️ conditional invincible ===== */
     if (MAYBE_INVINCIBLE_PREYS.includes(defenderRole)) {
-      const invinciblePlayers = players.filter((p) => {
+      const protectedPlayers = players.filter((p) => {
         const role = p.getState("role") as AnimalId | null;
-        return role === defenderRole && p.getState("status") === "ALIVE";
+        return (
+          !!role &&
+          MAYBE_INVINCIBLE_PREYS.includes(role) &&
+          p.getState("status") === "ALIVE"
+        );
       });
 
-      const attackerBiome = (
-        attacker.getState("biomeHistory") as (string | null)[]
+      const defenderBiome = (
+        defender.getState("biomeHistory") as (string | null)[]
       )?.[round - 1];
 
-      const isAllInSameBiome = invinciblePlayers.every((p) => {
-        const history = (p.getState("biomeHistory") as (string | null)[]) ?? [];
-        return history[round - 1] === attackerBiome;
-      });
+      const isAllInSameBiome =
+        !!defenderBiome &&
+        protectedPlayers.length > 0 &&
+        protectedPlayers.every((p) => {
+          const history =
+            (p.getState("biomeHistory") as (string | null)[]) ?? [];
+          return history[round - 1] === defenderBiome;
+        });
 
       if (isAllInSameBiome) {
         pushLog("IMMUNE", "아무 일도 일어나지 않았습니다.", {

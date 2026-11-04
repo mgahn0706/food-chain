@@ -5,6 +5,7 @@ import { ALL_ANIMALS } from "../../config/animals";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import usePlayerRole from "@/assets/utils/usePlayerRole";
+import { initialPlayer, type SavedPlayer } from "@/game/rejoin";
 
 export default function SettingPhase({
   onNextPhase,
@@ -20,10 +21,12 @@ export default function SettingPhase({
     [...ALL_ANIMALS]
   );
   const { randomizePlayerRole } = usePlayerRole();
+  const [, setSavedPlayers] = useMultiplayerState<SavedPlayer[]>("savedPlayers", []);
 
   if (!isHost) return null;
 
-  const playerCount = players.length;
+  const gamePlayers = players.filter((player) => player.id !== hostId);
+  const playerCount = gamePlayers.length;
   const selectedAnimals = animalConfig;
 
   const toggleAnimal = (id: AnimalId) => {
@@ -38,15 +41,15 @@ export default function SettingPhase({
   /* ================= Ready 체크 ================= */
 
   // host 제외한 모든 플레이어가 ready인지
-  const allNonHostReady = players
-    .filter((p) => p.id !== hostId)
-    .every((p) => p.getState("ready") === true);
+  const allNonHostReady = gamePlayers.every(
+    (player) => player.getState("ready") === true
+  );
 
   /* ================= 시작 가능 여부 ================= */
 
   const canStart =
-    playerCount >= 2 &&
-    selectedAnimals.length === playerCount - 1 &&
+    playerCount >= 1 &&
+    selectedAnimals.length === playerCount &&
     allNonHostReady;
 
   return (
@@ -129,7 +132,11 @@ export default function SettingPhase({
         <button
           type="button"
           onClick={() => {
-            randomizePlayerRole(animalConfig);
+            const assignments = randomizePlayerRole(animalConfig);
+            setSavedPlayers(
+              assignments.map(({ player, role }) => initialPlayer(player, role)),
+              true
+            );
             onNextPhase();
           }}
           disabled={!canStart}

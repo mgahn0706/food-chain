@@ -1,19 +1,17 @@
-import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import type { AnimalId } from "@/game/types/animal";
-import { useMultiplayerState, usePlayersList } from "playroomkit";
+import { myPlayer, usePlayersList } from "playroomkit";
 
 const usePlayerRole = () => {
-  const [role] = useMultiplayerState<AnimalId | null>("role", null);
   const players = usePlayersList(true);
-  const hostId = useSyncHostId();
+  const hostId = myPlayer().id;
 
   const randomizePlayerRole = (availableRoles: AnimalId[]) => {
-    if (players.length === 0) return;
+    if (players.length === 0) return [];
 
     // ✅ Host 제외
     const nonHostPlayers = players.filter((player) => player.id !== hostId);
 
-    if (nonHostPlayers.length === 0) return;
+    if (nonHostPlayers.length === 0) return [];
 
     // (안전) 역할 수가 맞지 않으면 early return
     if (availableRoles.length < nonHostPlayers.length) {
@@ -22,15 +20,19 @@ const usePlayerRole = () => {
         availableRoles.length,
         nonHostPlayers.length
       );
-      return;
+      return [];
     }
 
     // ✅ 역할 셔플
     const shuffledRoles = [...availableRoles].sort(() => Math.random() - 0.5);
 
     // ✅ non-host 플레이어에게만 배정
-    nonHostPlayers.forEach((player, index) => {
-      player.setState("role", shuffledRoles[index]);
+    const assignments = nonHostPlayers.map((player, index) => ({
+      player,
+      role: shuffledRoles[index],
+    }));
+    assignments.forEach(({ player, role }) => {
+      player.setState("role", role);
       player.setState("status", "ALIVE");
       player.setState("hasEaten", [false, false, false, false]);
       player.setState("biomeHistory", []);
@@ -40,9 +42,10 @@ const usePlayerRole = () => {
     // (선택) Host role 명시적으로 null 처리
     const hostPlayer = players.find((p) => p.id === hostId);
     hostPlayer?.setState("role", null);
+    return assignments;
   };
 
-  return { role, randomizePlayerRole };
+  return { randomizePlayerRole };
 };
 
 export default usePlayerRole;

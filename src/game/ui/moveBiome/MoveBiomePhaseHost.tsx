@@ -2,6 +2,7 @@ import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { Button } from "@/components/ui/button";
 import { BIOMES } from "@/game/config/biome";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
+import type { SavedPlayer } from "@/game/rejoin";
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
 import { Eye, EyeOff, Skull } from "lucide-react";
@@ -29,7 +30,6 @@ export default function MoveBiomePhaseHost({
   const [isAnimalRevealed, setIsAnimalRevealed] = useState(round !== 1);
 
   useEffect(() => {
-    setSeconds(0);
     const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => window.clearInterval(id);
   }, [round]);
@@ -39,9 +39,13 @@ export default function MoveBiomePhaseHost({
 
   const hostId = useSyncHostId();
   const playersAll = usePlayersList(true);
+  const [savedPlayers] = useMultiplayerState<SavedPlayer[]>("savedPlayers", []);
 
   const players = useMemo(
-    () => playersAll.filter((p) => p.id !== hostId),
+    () =>
+      playersAll.filter(
+        (player) => player.id !== hostId && player.getState("role")
+      ),
     [playersAll, hostId]
   );
 
@@ -97,6 +101,20 @@ export default function MoveBiomePhaseHost({
       };
     }, initial);
   }, [players, roundIndex]);
+
+  const disconnectedWithoutBiome = savedPlayers.filter((saved) => {
+    if (playersAll.some((player) => player.id === saved.currentId)) return false;
+    if (saved.state.status === "DEAD") return false;
+    const history = saved.state.biomeHistory as (BiomeId | null)[] | null;
+    return !history?.[roundIndex];
+  });
+  const missingNames = [
+    ...grouped.NONE.map(
+      (player) => player.getState("name") || player.getProfile().name
+    ),
+    ...disconnectedWithoutBiome.map((saved) => `${saved.name} (연결 끊김)`),
+  ];
+  const canAdvance = savedPlayers.length > 0 && missingNames.length === 0;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 py-10">
@@ -173,7 +191,7 @@ export default function MoveBiomePhaseHost({
           <p className="mb-3 text-sm font-medium text-gray-600">
             선택 안 됨{" "}
             <span className="font-semibold text-blue-500">
-              {grouped.NONE.length}
+              {missingNames.length}
             </span>
           </p>
 
@@ -200,6 +218,14 @@ export default function MoveBiomePhaseHost({
                 </div>
               );
             })}
+            {disconnectedWithoutBiome.map((saved) => (
+              <span
+                key={saved.originalId}
+                className="rounded-full bg-orange-50 px-3 py-1 text-sm text-orange-800 shadow-sm"
+              >
+                {saved.name} · 연결 끊김
+              </span>
+            ))}
           </div>
         </div>
 
@@ -242,11 +268,23 @@ export default function MoveBiomePhaseHost({
       </div>
 
       {/* ================= Footer ================= */}
-      <div className="mt-10 flex justify-center">
+      <div className="mt-10 flex flex-col items-center gap-3">
+        {missingNames.length > 0 && (
+          <p className="text-center text-sm text-orange-700" role="status">
+            장소 선택을 기다리는 중: {missingNames.join(", ")}
+          </p>
+        )}
+        {savedPlayers.length === 0 && (
+          <p className="text-center text-sm text-gray-500" role="status">
+            참가자 정보를 불러오는 중…
+          </p>
+        )}
         <Button
-          disabled={grouped.NONE.length > 0}
+          disabled={!canAdvance}
           className="bg-blue-500 text-white hover:bg-blue-600"
-          onClick={onNextPhase}
+          onClick={() => {
+            if (canAdvance) onNextPhase();
+          }}
         >
           장소 이동 종료
         </Button>

@@ -28,46 +28,7 @@ export default function PeekingPhase({
 
   const myRole = me.getState("role") as AnimalId | null;
 
-  /* ===================== HOST VIEW ===================== */
-  if (isHost) {
-    return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-6 text-center">
-        <Eye className="h-12 w-12 text-gray-500 animate-eye-blink" />
-
-        <p className="text-gray-600">플레이어들이 직업을 엿보는 중입니다</p>
-
-        <Button
-          className="bg-blue-500 text-white hover:bg-blue-600"
-          onClick={onNextPhase}
-        >
-          다음 단계
-        </Button>
-
-        <style>{`
-          @keyframes eyeBlink {
-            0%,45%,100% { transform: scaleY(1); }
-            50% { transform: scaleY(0.1); }
-            55% { transform: scaleY(1); }
-          }
-          .animate-eye-blink {
-            animation: eyeBlink 3.5s ease-in-out infinite;
-            transform-origin: center;
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  /* ===================== SPECTATOR ===================== */
-  if (!myRole) {
-    return (
-      <div className="flex h-full w-full items-center justify-center text-gray-500">
-        관전자입니다. 잠시만 기다려주세요…
-      </div>
-    );
-  }
-
-  const peekingCount = ANIMALS[myRole].peekingCount ?? 1;
+  const peekingCount = myRole ? ANIMALS[myRole].peekingCount ?? 1 : 1;
 
   /* ===================== STATE ===================== */
   const [targets, setTargets] = useState<(string | null)[]>(
@@ -79,7 +40,10 @@ export default function PeekingPhase({
 
   /* ===================== 후보 ===================== */
   const peekTargets = useMemo(
-    () => players.filter((p) => p.id !== me.id && p.id !== hostId),
+    () =>
+      players.filter(
+        (p) => p.id !== me.id && p.id !== hostId && p.getState("role")
+      ),
     [players, me.id, hostId]
   );
 
@@ -101,6 +65,40 @@ export default function PeekingPhase({
       return role;
     });
   }, [targets, revealed, peekTargets]);
+
+  if (isHost) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-6 text-center">
+        <Eye className="h-12 w-12 text-gray-500 animate-eye-blink" />
+        <p className="text-gray-600">플레이어들이 직업을 엿보는 중입니다</p>
+        <Button
+          className="bg-blue-500 text-white hover:bg-blue-600"
+          onClick={onNextPhase}
+        >
+          다음 단계
+        </Button>
+        <style>{`
+          @keyframes eyeBlink {
+            0%,45%,100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+            55% { transform: scaleY(1); }
+          }
+          .animate-eye-blink {
+            animation: eyeBlink 3.5s ease-in-out infinite;
+            transform-origin: center;
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  if (!myRole) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-gray-500">
+        관전자입니다. 잠시만 기다려주세요…
+      </div>
+    );
+  }
 
   /* ===================== PLAYER VIEW ===================== */
   return (
