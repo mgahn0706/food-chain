@@ -15,7 +15,23 @@ export type AnimalId =
   | "RAT"
   | "CHAMELEON"
   | "SNAKE"
-  | "CROW";
+  | "CROW"
+  | "ARMADILLO"
+  | "TURTLE"
+  | "WOLF"
+  | "RATTLESNAKE"
+  | "FLYING_SQUIRREL"
+  | "SHEEP"
+  | "PLATYPUS"
+  | "BAT"
+  | "COCK_PHEASANT"
+  | "HEN_PHEASANT"
+  | "HAWK"
+  | "FOX"
+  | "LIZARD"
+  | "CAT"
+  | "CHEETAH"
+  | "CAPYBARA";
 
 export interface Player {
   id: number;
@@ -26,6 +42,8 @@ export interface Player {
   hasEaten: Array<boolean | null>;
   camouflagedTo?: AnimalId;
   predictedWinner?: AnimalId;
+  protectedRound?: number | null;
+  contactedAnimalCount?: number;
   result: "WIN" | "LOSE" | null;
 }
 

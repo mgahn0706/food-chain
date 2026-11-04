@@ -4,6 +4,7 @@ import type { AnimalId } from "./types/animal";
 const PLAYER_STATE_KEYS = [
   "name", "role", "status", "ready", "checkedRole", "camouflagedTo",
   "predictWinner", "predictedWinner", "biomeHistory", "hasEaten", "result",
+  "protectedRound", "contactedAnimalCount",
 ] as const;
 
 export type SavedPlayer = {
@@ -45,6 +46,8 @@ export function initialPlayer(
       biomeHistory: [],
       hasEaten: [false, false, false, false],
       result: null,
+      protectedRound: null,
+      contactedAnimalCount: 0,
     },
   };
 }

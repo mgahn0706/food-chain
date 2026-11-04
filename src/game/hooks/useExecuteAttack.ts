@@ -5,6 +5,10 @@ import { usePlayerStatus } from "./usePlayerStatus";
 import { useMultiplayerState } from "playroomkit";
 
 const MAYBE_INVINCIBLE_PREYS: AnimalId[] = ["MALLARD", "HARE", "DEER", "OTTER"];
+const EXPANDED_INVINCIBLE_PREYS: AnimalId[] = [
+  "SHEEP", "PLATYPUS", "FLYING_SQUIRREL",
+];
+const SHIELDED_PREYS: AnimalId[] = ["ARMADILLO", "TURTLE", "LIZARD"];
 
 export default function useExecuteAttack({
   attackerId,
@@ -66,7 +70,7 @@ export default function useExecuteAttack({
     const defenderName = defender.getState("name");
 
     /* ===== 🐍 snake counter ===== */
-    if (defenderRole === "SNAKE") {
+    if (defenderRole === "SNAKE" || defenderRole === "RATTLESNAKE") {
       killPlayer(attacker.id);
       pushLog("KILL", `${attackerName}님이 사망했습니다.`, {
         attackerId: defender.id,
@@ -76,12 +80,25 @@ export default function useExecuteAttack({
     }
 
     /* ===== 🛡️ conditional invincible ===== */
-    if (MAYBE_INVINCIBLE_PREYS.includes(defenderRole)) {
+    if (defender.getState("protectedRound") === round) {
+      pushLog("IMMUNE", "아무 일도 일어나지 않았습니다.", {
+        attackerId,
+        defenderId,
+      });
+      return;
+    }
+
+    const protectionGroup = MAYBE_INVINCIBLE_PREYS.includes(defenderRole)
+      ? MAYBE_INVINCIBLE_PREYS
+      : EXPANDED_INVINCIBLE_PREYS.includes(defenderRole)
+        ? EXPANDED_INVINCIBLE_PREYS
+        : null;
+    if (protectionGroup) {
       const protectedPlayers = players.filter((p) => {
         const role = p.getState("role") as AnimalId | null;
         return (
           !!role &&
-          MAYBE_INVINCIBLE_PREYS.includes(role) &&
+          protectionGroup.includes(role) &&
           p.getState("status") === "ALIVE"
         );
       });
@@ -119,10 +136,35 @@ export default function useExecuteAttack({
 
     /* ===== 🦁 attacker wins ===== */
     if (ANIMALS[attackerRole].rank < ANIMALS[defenderRole].rank) {
-      eatPlayer(attacker.id, defender.id, round);
-      pushLog("KILL", `${defenderName}님이 사망했습니다.`, {
+      if (
+        SHIELDED_PREYS.includes(defenderRole) &&
+        !defender.getState("protectedRound")
+      ) {
+        defender.setState("protectedRound", round, true);
+        pushLog("IMMUNE", "아무 일도 일어나지 않았습니다.", {
+          attackerId,
+          defenderId,
+        });
+        return;
+      }
+
+      const pairedRole = defenderRole === "HEN_PHEASANT"
+        ? "COCK_PHEASANT"
+        : defenderRole === "COCK_PHEASANT"
+          ? "HEN_PHEASANT"
+          : null;
+      const partner = pairedRole
+        ? players.find(
+            (player) =>
+              player.getState("role") === pairedRole &&
+              player.getState("status") === "ALIVE"
+          )
+        : null;
+      const eaten = partner ?? defender;
+      eatPlayer(attacker.id, eaten.id, round);
+      pushLog("KILL", `${eaten.getState("name") || eaten.getProfile().name || defenderName}님이 사망했습니다.`, {
         attackerId: attacker.id,
-        defenderId: defender.id,
+        defenderId: eaten.id,
       });
       return;
     }

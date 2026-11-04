@@ -37,6 +37,8 @@ const usePlayerRole = () => {
       player.setState("hasEaten", [false, false, false, false]);
       player.setState("biomeHistory", []);
       player.setState("result", null);
+      player.setState("protectedRound", null);
+      player.setState("contactedAnimalCount", 0);
     });
 
     // (선택) Host role 명시적으로 null 처리

@@ -1,7 +1,11 @@
 import { useIsHost, usePlayersList, useMultiplayerState } from "playroomkit";
 
 import type { AnimalId } from "../../types/animal";
-import { ALL_ANIMALS } from "../../config/animals";
+import {
+  ADDED_ANIMALS,
+  ALL_ANIMALS,
+  DEFAULT_ANIMALS,
+} from "../../config/animals";
 import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { useSyncHostId } from "@/game/hooks/useSyncHost";
 import usePlayerRole from "@/assets/utils/usePlayerRole";
@@ -18,7 +22,7 @@ export default function SettingPhase({
 
   const [animalConfig, setAnimalConfig] = useMultiplayerState<AnimalId[]>(
     "animalConfig",
-    [...ALL_ANIMALS]
+    [...DEFAULT_ANIMALS]
   );
   const { randomizePlayerRole } = usePlayerRole();
   const [, setSavedPlayers] = useMultiplayerState<SavedPlayer[]>("savedPlayers", []);
@@ -35,6 +39,40 @@ export default function SettingPhase({
         ? selectedAnimals.filter((a) => a !== id)
         : [...selectedAnimals, id],
       true
+    );
+  };
+
+  const renderAnimalOption = (animalId: AnimalId) => {
+    const isSelected = selectedAnimals.includes(animalId);
+
+    return (
+      <button
+        key={animalId}
+        type="button"
+        onClick={() => toggleAnimal(animalId)}
+        className={`
+          relative flex items-center justify-between
+          rounded-xl px-3 py-2
+          border transition-colors duration-150
+          focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
+          ${
+            isSelected
+              ? "bg-blue-50 border-blue-500 shadow-sm"
+              : "bg-white border-gray-200 hover:bg-gray-50"
+          }
+        `}
+      >
+        <div className={`flex items-center gap-2 min-w-0 ${!isSelected && "opacity-60"}`}>
+          <img
+            src={`/animal/${animalId}.svg`}
+            alt=""
+            className="h-8 w-8 shrink-0 rounded-sm"
+          />
+          <span className="text-sm font-medium truncate text-gray-900">
+            {animalNameMap[animalId]}
+          </span>
+        </div>
+      </button>
     );
   };
 
@@ -84,46 +122,22 @@ export default function SettingPhase({
           )}
         </div>
 
-        {/* ===== 동물 선택 Grid ===== */}
-        <div className="grid grid-cols-3 gap-x-4 gap-y-3">
-          {ALL_ANIMALS.map((animalId) => {
-            const isSelected = selectedAnimals.includes(animalId);
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-500">
+            기본 동물 · {DEFAULT_ANIMALS.length}종
+          </h3>
+          <div className="grid grid-cols-3 gap-x-4 gap-y-3">
+            {DEFAULT_ANIMALS.map(renderAnimalOption)}
+          </div>
+        </div>
 
-            return (
-              <button
-                key={animalId}
-                type="button"
-                onClick={() => toggleAnimal(animalId)}
-                className={`
-                  relative flex items-center justify-between
-                  rounded-xl px-3 py-2
-                  border transition-colors duration-150
-                  focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500
-                  ${
-                    isSelected
-                      ? "bg-blue-50 border-blue-500 shadow-sm"
-                      : "bg-white border-gray-200 hover:bg-gray-50"
-                  }
-                `}
-              >
-                <div
-                  className={`
-                    flex items-center gap-2 min-w-0
-                    ${!isSelected && "opacity-60"}
-                  `}
-                >
-                  <img
-                    src={`/animal/${animalId}.svg`}
-                    alt={animalId}
-                    className="h-8 w-8 shrink-0 rounded-sm"
-                  />
-                  <span className="text-sm font-medium truncate text-gray-900">
-                    {animalNameMap[animalId]}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
+        <div className="space-y-3 border-t border-gray-100 pt-5">
+          <h3 className="text-sm font-medium text-gray-500">
+            추가 동물 · {ADDED_ANIMALS.length}종
+          </h3>
+          <div className="grid grid-cols-3 gap-x-4 gap-y-3">
+            {ADDED_ANIMALS.map(renderAnimalOption)}
+          </div>
         </div>
       </section>
 

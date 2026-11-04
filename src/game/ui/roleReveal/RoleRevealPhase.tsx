@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ALL_ANIMALS } from "@/game/config/animals";
+import { animalCardSrc } from "@/game/config/animalCard";
 
 export default function RoleRevealPhase({
   onNextPhase,
@@ -135,7 +136,8 @@ export default function RoleRevealPhase({
     me.getState("predictWinner")) as AnimalId | null;
 
   const mustPickCamouflage = role === "CHAMELEON";
-  const mustPickPredict = role === "CROW";
+  const mustPickPredict =
+    role === "CROW" || role === "FOX" || role === "CAT";
 
   const canConfirm =
     !checkedRole &&
@@ -153,7 +155,7 @@ export default function RoleRevealPhase({
             transitionSpeed={600}
           >
             <img
-              src={`/card/${role}.png`}
+              src={animalCardSrc(role)}
               alt="role reveal"
               className="h-68 w-48 md:h-68 md:w-48 select-none"
               draggable={false}
@@ -198,10 +200,12 @@ export default function RoleRevealPhase({
           )}
 
           {/* ================= CROW ================= */}
-          {role === "CROW" && (
+          {mustPickPredict && (
             <div className="w-full max-w-xs">
               <p className="mb-2 text-sm text-gray-500">
-                승리할 것으로 예상되는 동물을 선택하세요
+                {role === "CAT"
+                  ? "패배할 것으로 예상되는 동물을 선택하세요"
+                  : "승리할 것으로 예상되는 동물을 선택하세요"}
               </p>
 
               <Select
@@ -214,7 +218,7 @@ export default function RoleRevealPhase({
                 </SelectTrigger>
 
                 <SelectContent>
-                  {ALL_ANIMALS.filter((animal) => animal !== "CROW").map(
+                  {ALL_ANIMALS.filter((animal) => animal !== role).map(
                     (animal) => (
                       <SelectItem key={animal} value={animal}>
                         {animalNameMap[animal]}

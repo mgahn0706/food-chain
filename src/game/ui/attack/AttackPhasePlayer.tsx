@@ -11,6 +11,7 @@ import { myPlayer, usePlayersList } from "playroomkit";
 import { Hand } from "lucide-react";
 
 import type { BiomeId } from "@/game/types/biome";
+import type { AnimalId } from "@/game/types/animal";
 
 import { BIOMES } from "@/game/config/biome";
 import PlayerHeader from "@/game/components/PlayerHeader";
@@ -22,13 +23,13 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
   const players = usePlayersList(true);
 
   const myStatus = me.getState("status");
+  const myRole = me.getState("role") as AnimalId | null;
 
   /* ===================== TIMER ===================== */
 
   const [seconds, setSeconds] = useState(0);
 
   useEffect(() => {
-    setSeconds(0);
     const id = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     return () => window.clearInterval(id);
   }, [round]);
@@ -65,7 +66,11 @@ export default function AttackPhasePlayer({ round }: { round: number }) {
     });
   }, [players, me.id, myBiome, roundIndex]);
 
-  const canAttack = !!targetId && candidates.length > 0;
+  const canAttack =
+    !!targetId &&
+    candidates.length > 0 &&
+    myRole !== "SNAKE" &&
+    myRole !== "RATTLESNAKE";
 
   /* ===================== Execute Attack ===================== */
 

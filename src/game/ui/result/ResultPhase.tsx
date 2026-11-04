@@ -18,6 +18,7 @@ import Tilt from "react-parallax-tilt";
 
 import { BIOMES } from "@/game/config/biome";
 import { ANIMALS } from "@/game/config/animals";
+import { animalCardSrc } from "@/game/config/animalCard";
 
 import type { AnimalId } from "@/game/types/animal";
 import type { BiomeId } from "@/game/types/biome";
@@ -33,6 +34,7 @@ export interface GamePlayer {
   status: "ALIVE" | "DEAD";
   biomeHistory: (BiomeId | null)[];
   predictedWinner: AnimalId | null;
+  contactedAnimalCount: number;
 }
 
 const MAX_ROUNDS = 4;
@@ -53,7 +55,7 @@ export default function ResultPhase({
   const [, setAttackLogs] = useMultiplayerState<AttackLog[]>("attackLogs", []);
 
   /* ---------- normalize ---------- */
-  const gamePlayers: GamePlayer[] = players
+  const playerResults: GamePlayer[] = players
     .filter((player) => player.id !== hostId && player.getState("role"))
     .map((player) => ({
       id: player.id,
@@ -63,7 +65,24 @@ export default function ResultPhase({
       biomeHistory: player.getState("biomeHistory") ?? [],
       predictedWinner:
         player.getState("predictedWinner") ?? player.getState("predictWinner"),
+      contactedAnimalCount: player.getState("contactedAnimalCount") ?? 0,
     }));
+  const gamePlayers = playerResults.map((player) => {
+    const metPlayers = playerResults.filter(
+      (other) =>
+        other.id !== player.id &&
+        player.biomeHistory.some(
+          (biome, index) => biome && other.biomeHistory[index] === biome
+        )
+    );
+    return {
+      ...player,
+      contactedAnimalCount: Math.max(
+        player.contactedAnimalCount,
+        metPlayers.length
+      ),
+    };
+  });
 
   /* ---------- victory judgment ---------- */
   const winners = gamePlayers.filter(
@@ -87,7 +106,7 @@ export default function ResultPhase({
           <>
             <Tilt tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.1}>
               <img
-                src={`/card/${role}.png`}
+                src={animalCardSrc(role!)}
                 alt="role reveal"
                 className="h-68 w-48 select-none"
                 draggable={false}
@@ -102,7 +121,7 @@ export default function ResultPhase({
           <>
             <Tilt tiltMaxAngleX={12} tiltMaxAngleY={12} scale={1.1}>
               <img
-                src={`/card/${role}.png`}
+                src={animalCardSrc(role!)}
                 alt="role reveal"
                 className="h-68 w-48 select-none"
                 draggable={false}
@@ -137,6 +156,8 @@ export default function ResultPhase({
       p.setState("hasEaten", [false, false, false, false]);
       p.setState("checkedRole", false);
       p.setState("camouflagedTo", null);
+      p.setState("protectedRound", null);
+      p.setState("contactedAnimalCount", 0);
       p.setState("ready", false);
     });
     setAttackLogs([]);

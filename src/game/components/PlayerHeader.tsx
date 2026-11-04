@@ -16,6 +16,7 @@ import { animalNameMap } from "@/assets/utils/animalNameMap";
 import { BIOMES } from "@/game/config/biome";
 import type { BiomeId } from "@/game/types/biome";
 import { ANIMALS } from "../config/animals";
+import { animalCardSrc } from "../config/animalCard";
 
 /* ===================== constants ===================== */
 
@@ -136,7 +137,7 @@ export default function PlayerHeader() {
                 transitionSpeed={600}
               >
                 <img
-                  src={`/card/${myRole}.png`}
+                  src={animalCardSrc(myRole)}
                   alt={myRole}
                   className="h-68 w-48"
                 />
